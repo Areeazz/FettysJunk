@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { motion, useInView, useScroll, useTransform } from "framer-motion";
+import { motion, useScroll, useTransform } from "framer-motion";
 import {
   ArrowRight,
   ChevronLeft,
@@ -14,8 +14,8 @@ import {
 
 const heroPoster = "/images/hero-poster.jpg";
 const heroVideoSources = [
-  { src: "/videos/FettysJunkhero-mobile.mp4", media: "(max-width: 640px)" },
-  { src: "/videos/FettysJunkhero.mp4" },
+  { src: "/videos/hero-720.mp4", media: "(max-width: 767px)" },
+  { src: "/videos/hero-1080.mp4" },
 ];
 const aboutImage = {
   src: "/images/about-fettys-community.jpg",
@@ -184,6 +184,35 @@ function FadeIn({ children, className = "", delay = 0 }) {
       {children}
     </motion.div>
   );
+}
+
+function useNearViewport(ref, rootMargin = "360px 0px") {
+  const [isNearViewport, setIsNearViewport] = useState(false);
+
+  useEffect(() => {
+    const node = ref.current;
+    if (!node || isNearViewport) return undefined;
+
+    if (!("IntersectionObserver" in window)) {
+      setIsNearViewport(true);
+      return undefined;
+    }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsNearViewport(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin }
+    );
+
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [isNearViewport, ref, rootMargin]);
+
+  return isNearViewport;
 }
 
 function JobberLink({ children, className = "", onClick, ariaLabel }) {
@@ -696,7 +725,7 @@ function Results() {
 function WorkVideoCard({ item, isActive, isSoundOn, onToggleSound, onSyncPlayback, setVideoRef }) {
   const cardRef = useRef(null);
   const videoRef = useRef(null);
-  const shouldLoadVideo = useInView(cardRef, { once: true, margin: "360px 0px" });
+  const shouldLoadVideo = useNearViewport(cardRef);
 
   const assignVideoRef = (node) => {
     videoRef.current = node;
