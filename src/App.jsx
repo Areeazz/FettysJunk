@@ -486,11 +486,11 @@ function Services() {
               Services
             </p>
             <h2 className="font-display text-4xl leading-none text-cream sm:text-6xl">
-              Three simple ways to clear the space.
+              Junk Removal Services Built Around What You Need Gone
             </h2>
           </div>
           <p className="max-w-md text-base leading-7 text-mist/62">
-            Local hauling services for Belle Isle, Orlando, Conway, and Edgewood homes, rentals, remodels, garages, furniture removal, and small job sites.
+            From single-item pickups to full cleanouts, Fetty's helps remove unwanted junk quickly, respectfully, and professionally.
           </p>
         </FadeIn>
 
@@ -922,15 +922,28 @@ function BookingCTA() {
             </JobberLink>
           </div>
         </div>
-        <div className="relative min-h-[24rem] overflow-hidden">
-          <ResponsiveImage
-            image={aboutImage}
-            alt="Father and son team offering veteran-owned junk removal and hauling services in Belle Isle FL"
-            className="h-full w-full object-cover"
-            sizes="(min-width: 1024px) 42vw, 100vw"
-            loading="lazy"
-          />
-          <div className="absolute inset-0 bg-gradient-to-r from-periwinkle/70 via-navy/20 to-transparent" />
+        <div className="relative grid min-h-[24rem] place-items-center overflow-hidden bg-[radial-gradient(circle_at_50%_44%,rgba(157,188,244,0.18),transparent_20rem),linear-gradient(135deg,rgba(7,17,31,0.96),rgba(16,26,51,0.86))] p-10 text-center">
+          <div className="absolute inset-0 bg-[linear-gradient(115deg,transparent,rgba(157,188,244,0.08),transparent)]" />
+          <motion.div
+            className="relative flex flex-col items-center"
+            whileHover={{ scale: 1.025 }}
+            transition={{ duration: 0.35 }}
+          >
+            <div className="absolute -inset-10 rounded-full bg-coral/10 blur-3xl" />
+            <img
+              src="/favicon.svg"
+              alt="Fetty's Junk Removal logo"
+              className="relative h-28 w-28 rounded-3xl border border-white/[0.08] bg-midnight/70 p-4 shadow-[0_24px_70px_rgba(0,0,0,0.34)] sm:h-36 sm:w-36"
+              loading="lazy"
+              decoding="async"
+            />
+            <p className="relative mt-6 font-display text-3xl leading-none text-cream sm:text-4xl">
+              Fetty's
+            </p>
+            <p className="relative mt-3 text-xs font-bold uppercase tracking-[0.22em] text-coral/85">
+              Junk Removal
+            </p>
+          </motion.div>
         </div>
       </FadeIn>
     </section>
