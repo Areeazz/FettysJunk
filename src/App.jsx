@@ -12,11 +12,18 @@ import {
   X,
 } from "lucide-react";
 
-const aboutImage = "/images/about-fettys-community.jpg";
-const brandImage =
-  "https://images.squarespace-cdn.com/content/v1/69162c685cc45613c202fa82/b90e9054-25c3-47c9-98e9-9f5083cd9d98/IMG_0007-Picsart-BackgroundRemover.jpg?format=1500w";
-
-const heroVideo = "/videos/FettysJunkhero.mp4";
+const heroPoster = "/images/hero-poster.jpg";
+const heroVideoSources = [
+  { src: "/videos/FettysJunkhero-mobile.mp4", media: "(max-width: 640px)" },
+  { src: "/videos/FettysJunkhero.mp4" },
+];
+const aboutImage = {
+  src: "/images/about-fettys-community.jpg",
+  webp: [
+    { src: "/images/about-fettys-community-640.webp", width: 640 },
+    { src: "/images/about-fettys-community-960.webp", width: 960 },
+  ],
+};
 const jobberFormUrl = "https://l.jbbr.io/eOcGjij";
 
 const developerCredit = {
@@ -33,19 +40,37 @@ const services = [
   {
     title: "Construction Debris",
     copy: "Final cleanup, leftover materials, and site debris handled with tidy, professional speed.",
-    image: "/images/construction-debris-service.jpg",
+    image: {
+      src: "/images/construction-debris-service.jpg",
+      webp: [
+        { src: "/images/construction-debris-service-480.webp", width: 480 },
+        { src: "/images/construction-debris-service-900.webp", width: 900 },
+      ],
+    },
     alt: "Construction debris removal and property cleanup service in Belle Isle and Orlando",
   },
   {
     title: "Household Junk",
     copy: "Moving, clearing, refreshing, or reclaiming space without the weekend-long headache.",
-    image: "/images/household-junk-service.jpg",
+    image: {
+      src: "/images/household-junk-service.jpg",
+      webp: [
+        { src: "/images/household-junk-service-480.webp", width: 480 },
+        { src: "/images/household-junk-service-900.webp", width: 900 },
+      ],
+    },
     alt: "Residential furniture removal and household junk hauling for Belle Isle and Orlando homes",
   },
   {
     title: "Miscellaneous Garbage",
     copy: "Odd piles, random loads, garage corners, and the things that do not fit cleanly in a category.",
-    image: "/images/misc-garbage-service.jpg",
+    image: {
+      src: "/images/misc-garbage-service.jpg",
+      webp: [
+        { src: "/images/misc-garbage-service-480.webp", width: 480 },
+        { src: "/images/misc-garbage-service-768.webp", width: 768 },
+      ],
+    },
     alt: "Miscellaneous junk hauling services and garage cleanup near Belle Isle FL",
   },
 ];
@@ -56,7 +81,11 @@ const workItems = [
     type: "video",
     title: "Transformation",
     label: "Transformation",
-    src: "/videos/work-montage-2.mp4",
+    sources: [
+      { src: "/videos/work-montage-2-mobile.mp4", media: "(max-width: 640px)" },
+      { src: "/videos/work-montage-2.mp4" },
+    ],
+    poster: "/images/work-montage-2-poster.jpg",
     ariaLabel: "Transformation video showing junk removal and property cleanup results in Belle Isle and Orlando",
   },
   {
@@ -64,15 +93,31 @@ const workItems = [
     type: "video",
     title: "Transformation",
     label: "Transformation",
-    src: "/videos/results-montage.mp4",
+    sources: [
+      { src: "/videos/results-montage-mobile.mp4", media: "(max-width: 640px)" },
+      { src: "/videos/results-montage.mp4" },
+    ],
+    poster: "/images/results-montage-poster.jpg",
     ariaLabel: "Transformation video showing veteran-owned junk removal work in the Orlando area",
   },
   {
     id: "cleanout-transformation",
     type: "beforeAfter",
     title: "Cleanout Transformation",
-    before: "/Before1.jpg",
-    after: "/After1.jpg",
+    before: {
+      src: "/Before1.jpg",
+      webp: [
+        { src: "/Before1-640.webp", width: 640 },
+        { src: "/Before1-960.webp", width: 960 },
+      ],
+    },
+    after: {
+      src: "/After1.jpg",
+      webp: [
+        { src: "/After1-640.webp", width: 640 },
+        { src: "/After1-960.webp", width: 960 },
+      ],
+    },
     beforeAlt: "Before junk removal cleanup with debris ready for hauling in Belle Isle and Orlando",
     afterAlt: "After junk removal cleanup showing a cleared property in Belle Isle and Orlando",
   },
@@ -80,8 +125,20 @@ const workItems = [
     id: "space-reclaimed",
     type: "beforeAfter",
     title: "Space Reclaimed",
-    before: "/Before2.jpg",
-    after: "/After2.jpg",
+    before: {
+      src: "/Before2.jpg",
+      webp: [
+        { src: "/Before2-640.webp", width: 640 },
+        { src: "/Before2-960.webp", width: 960 },
+      ],
+    },
+    after: {
+      src: "/After2.jpg",
+      webp: [
+        { src: "/After2-640.webp", width: 640 },
+        { src: "/After2-960.webp", width: 960 },
+      ],
+    },
     beforeAlt: "Before property cleanup and junk hauling service in the Orlando area",
     afterAlt: "After property cleanup with outdoor space reclaimed after junk removal",
   },
@@ -144,6 +201,27 @@ function JobberLink({ children, className = "", onClick, ariaLabel }) {
   );
 }
 
+function ResponsiveImage({ image, alt, className = "", loading = "lazy", sizes, fetchPriority }) {
+  const webpSrcSet = image.webp?.map((entry) => `${entry.src} ${entry.width}w`).join(", ");
+
+  return (
+    <picture className="block h-full w-full">
+      {webpSrcSet ? (
+        <source type="image/webp" srcSet={webpSrcSet} sizes={sizes} />
+      ) : null}
+      <img
+        src={image.src}
+        alt={alt}
+        className={className}
+        loading={loading}
+        decoding="async"
+        sizes={sizes}
+        fetchPriority={fetchPriority}
+      />
+    </picture>
+  );
+}
+
 function App() {
   const [menuOpen, setMenuOpen] = useState(false);
   const { scrollYProgress } = useScroll();
@@ -186,35 +264,28 @@ function Hero({ menuOpen, setMenuOpen, heroScale, heroOpacity }) {
         className="absolute inset-0"
         style={{ scale: heroScale, opacity: heroOpacity }}
       >
-        {heroVideo ? (
-          <video
-            className="pointer-events-none absolute inset-0 h-full w-full object-cover brightness-[0.62] contrast-110 saturate-[0.86]"
-            poster={brandImage}
-            autoPlay
-            muted
-            loop
-            playsInline
-            preload="metadata"
-            controls={false}
-            disablePictureInPicture
-            controlsList="nodownload noplaybackrate nofullscreen"
-            aria-label="Fetty's Junk Removal background video"
-          >
-            <source src={heroVideo} type="video/mp4" />
-          </video>
-        ) : null}
-        {!heroVideo ? (
-          <div
-            className="absolute inset-0 bg-cover opacity-40"
-            style={{
-              backgroundImage: `url(${brandImage})`,
-              backgroundPosition: "68% center",
-              WebkitMaskImage: "linear-gradient(to left, black 0%, black 48%, transparent 78%)",
-              maskImage: "linear-gradient(to left, black 0%, black 48%, transparent 78%)",
-            }}
-            aria-hidden="true"
-          />
-        ) : null}
+        <video
+          className="pointer-events-none absolute inset-0 h-full w-full object-cover brightness-[0.62] contrast-110 saturate-[0.86]"
+          poster={heroPoster}
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="metadata"
+          controls={false}
+          disablePictureInPicture
+          controlsList="nodownload noplaybackrate nofullscreen"
+          aria-label="Fetty's Junk Removal background video"
+        >
+          {heroVideoSources.map((source) => (
+            <source
+              key={source.src}
+              src={source.src}
+              media={source.media}
+              type="video/mp4"
+            />
+          ))}
+        </video>
       </motion.div>
       <div className="absolute inset-0 bg-gradient-to-r from-midnight/78 via-navy/48 to-periwinkle/18" />
       <div className="absolute inset-0 bg-gradient-to-t from-midnight/74 via-navy/10 to-midnight/28" />
@@ -290,7 +361,7 @@ function Hero({ menuOpen, setMenuOpen, heroScale, heroOpacity }) {
           className="max-w-sm md:max-w-md md:text-right"
           initial={{ opacity: 0, y: 32 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
+          transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
         >
           <p className="dark-glass-pill mb-4 inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-bold uppercase tracking-[0.2em] text-mist/84 md:ml-auto">
             <Sparkles size={14} />
@@ -359,12 +430,12 @@ function About() {
           >
             <div className="absolute -inset-4 -z-10 rounded-[1.65rem] bg-[radial-gradient(circle_at_50%_42%,rgba(60,125,224,0.24),transparent_65%)] blur-2xl transition duration-700 group-hover:opacity-90" />
             <div className="relative aspect-[3/2] overflow-hidden rounded-2xl border border-white/[0.06] bg-midnight/45 shadow-[0_24px_70px_rgba(0,0,0,0.34)]">
-              <img
-                src={aboutImage}
+              <ResponsiveImage
+                image={aboutImage}
                 alt="Father and son team behind Fetty's Junk Removal, a veteran-owned local service"
                 className="h-full w-full object-cover transition duration-700 group-hover:scale-[1.025]"
+                sizes="(min-width: 1024px) 42vw, 100vw"
                 loading="lazy"
-                decoding="async"
               />
             </div>
           </motion.div>
@@ -403,12 +474,12 @@ function Services() {
                 transition={{ duration: 0.3 }}
               >
                 <div className="relative m-3 aspect-[4/3] overflow-hidden rounded-md">
-                  <img
-                    src={service.image}
+                  <ResponsiveImage
+                    image={service.image}
                     alt={service.alt}
                     className="h-full w-full object-cover saturate-[0.88] transition duration-700 group-hover:scale-105 group-hover:saturate-100"
+                    sizes="(min-width: 1024px) 31vw, (min-width: 640px) 50vw, 100vw"
                     loading="lazy"
-                    decoding="async"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-midnight/72 via-periwinkle/10 to-transparent" />
                 </div>
@@ -642,6 +713,7 @@ function WorkVideoCard({ item, isActive, isSoundOn, onToggleSound, onSyncPlaybac
   useEffect(() => {
     if (!shouldLoadVideo) return undefined;
 
+    videoRef.current?.load();
     startVideo();
 
     const video = videoRef.current;
@@ -670,8 +742,7 @@ function WorkVideoCard({ item, isActive, isSoundOn, onToggleSound, onSyncPlaybac
         <video
           ref={assignVideoRef}
           className="absolute inset-0 h-full w-full object-cover transition duration-700 group-hover:scale-[1.025]"
-          src={shouldLoadVideo ? item.src : undefined}
-          poster={brandImage}
+          poster={item.poster}
           autoPlay={shouldLoadVideo}
           muted={!isSoundOn}
           loop
@@ -681,7 +752,18 @@ function WorkVideoCard({ item, isActive, isSoundOn, onToggleSound, onSyncPlaybac
           onLoadedMetadata={startVideo}
           onCanPlay={startVideo}
           aria-label={item.ariaLabel}
-        />
+        >
+          {shouldLoadVideo
+            ? item.sources.map((source) => (
+                <source
+                  key={source.src}
+                  src={source.src}
+                  media={source.media}
+                  type="video/mp4"
+                />
+              ))
+            : null}
+        </video>
         <div className="absolute inset-0 z-20 bg-gradient-to-t from-midnight/56 via-navy/10 to-midnight/16" />
         <div className="pointer-events-none absolute inset-0 z-20 rounded-md ring-1 ring-inset ring-white/[0.035]" />
         <div className="absolute inset-0 z-20 bg-[radial-gradient(circle_at_72%_16%,rgba(157,188,244,0.12),transparent_28rem)]" />
@@ -734,24 +816,40 @@ function BeforeAfterCard({ item, isActive }) {
       aria-label={`${item.title} before and after transformation`}
     >
       <div className="relative aspect-[4/5] overflow-hidden rounded-md sm:aspect-[16/10]">
-        <motion.img
-          src={item.before}
-          alt={item.beforeAlt}
-          className="absolute inset-0 h-full w-full object-cover"
-          loading="lazy"
-          decoding="async"
-          animate={{ opacity: showAfter ? 0 : 1, scale: showAfter ? 1.04 : 1 }}
-          transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
-        />
-        <motion.img
-          src={item.after}
-          alt={item.afterAlt}
-          className="absolute inset-0 h-full w-full object-cover"
-          loading="lazy"
-          decoding="async"
-          animate={{ opacity: showAfter ? 1 : 0, scale: showAfter ? 1.045 : 1 }}
-          transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
-        />
+        <picture className="absolute inset-0 block h-full w-full">
+          <source
+            type="image/webp"
+            srcSet={item.before.webp.map((entry) => `${entry.src} ${entry.width}w`).join(", ")}
+            sizes="(min-width: 768px) 70vw, 100vw"
+          />
+          <motion.img
+            src={item.before.src}
+            alt={item.beforeAlt}
+            className="h-full w-full object-cover"
+            loading="lazy"
+            decoding="async"
+            sizes="(min-width: 768px) 70vw, 100vw"
+            animate={{ opacity: showAfter ? 0 : 1, scale: showAfter ? 1.04 : 1 }}
+            transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+          />
+        </picture>
+        <picture className="absolute inset-0 block h-full w-full">
+          <source
+            type="image/webp"
+            srcSet={item.after.webp.map((entry) => `${entry.src} ${entry.width}w`).join(", ")}
+            sizes="(min-width: 768px) 70vw, 100vw"
+          />
+          <motion.img
+            src={item.after.src}
+            alt={item.afterAlt}
+            className="h-full w-full object-cover"
+            loading="lazy"
+            decoding="async"
+            sizes="(min-width: 768px) 70vw, 100vw"
+            animate={{ opacity: showAfter ? 1 : 0, scale: showAfter ? 1.045 : 1 }}
+            transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+          />
+        </picture>
         <div className="absolute inset-0 bg-gradient-to-t from-midnight/78 via-navy/10 to-transparent" />
         <div className="pointer-events-none absolute inset-0 rounded-md ring-1 ring-inset ring-white/[0.035]" />
         <motion.span
@@ -796,12 +894,12 @@ function BookingCTA() {
           </div>
         </div>
         <div className="relative min-h-[24rem] overflow-hidden">
-          <img
-            src={brandImage}
-            alt="Fetty's Junk Removal truck for local junk hauling in Belle Isle FL"
+          <ResponsiveImage
+            image={aboutImage}
+            alt="Father and son team offering veteran-owned junk removal and hauling services in Belle Isle FL"
             className="h-full w-full object-cover"
+            sizes="(min-width: 1024px) 42vw, 100vw"
             loading="lazy"
-            decoding="async"
           />
           <div className="absolute inset-0 bg-gradient-to-r from-periwinkle/70 via-navy/20 to-transparent" />
         </div>
