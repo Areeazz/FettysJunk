@@ -1,7 +1,7 @@
 {
   "name": "Fetty's Junk Removal",
   "short_name": "Fetty's",
-  "description": "Local junk removal and cleanout service for Belle Isle and nearby Orlando neighborhoods.",
+  "description": "Veteran-owned junk removal, hauling services, cleanouts, and property cleanup for Belle Isle and nearby Orlando neighborhoods.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#07111f",

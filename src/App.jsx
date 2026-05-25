@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion, useInView, useScroll, useTransform } from "framer-motion";
 import {
   ArrowRight,
   ChevronLeft,
@@ -34,46 +34,56 @@ const services = [
     title: "Construction Debris",
     copy: "Final cleanup, leftover materials, and site debris handled with tidy, professional speed.",
     image: "/images/construction-debris-service.jpg",
-    alt: "Construction debris removal and cleanup service in Belle Isle and Orlando",
+    alt: "Construction debris removal and property cleanup service in Belle Isle and Orlando",
   },
   {
     title: "Household Junk",
     copy: "Moving, clearing, refreshing, or reclaiming space without the weekend-long headache.",
     image: "/images/household-junk-service.jpg",
-    alt: "Household junk removal for Belle Isle and nearby Orlando homes",
+    alt: "Residential furniture removal and household junk hauling for Belle Isle and Orlando homes",
   },
   {
     title: "Miscellaneous Garbage",
     copy: "Odd piles, random loads, garage corners, and the things that do not fit cleanly in a category.",
     image: "/images/misc-garbage-service.jpg",
-    alt: "Miscellaneous junk hauling and garbage pickup near Belle Isle FL",
+    alt: "Miscellaneous junk hauling services and garage cleanup near Belle Isle FL",
   },
 ];
 
 const workItems = [
   {
+    id: "work-montage-2",
     type: "video",
     title: "Transformation",
     label: "Transformation",
     src: "/videos/work-montage-2.mp4",
+    ariaLabel: "Transformation video showing junk removal and property cleanup results in Belle Isle and Orlando",
   },
   {
+    id: "results-montage",
     type: "video",
     title: "Transformation",
     label: "Transformation",
     src: "/videos/results-montage.mp4",
+    ariaLabel: "Transformation video showing veteran-owned junk removal work in the Orlando area",
   },
   {
+    id: "cleanout-transformation",
     type: "beforeAfter",
     title: "Cleanout Transformation",
     before: "/Before1.jpg",
     after: "/After1.jpg",
+    beforeAlt: "Before junk removal cleanup with debris ready for hauling in Belle Isle and Orlando",
+    afterAlt: "After junk removal cleanup showing a cleared property in Belle Isle and Orlando",
   },
   {
+    id: "space-reclaimed",
     type: "beforeAfter",
     title: "Space Reclaimed",
     before: "/Before2.jpg",
     after: "/After2.jpg",
+    beforeAlt: "Before property cleanup and junk hauling service in the Orlando area",
+    afterAlt: "After property cleanup with outdoor space reclaimed after junk removal",
   },
 ];
 
@@ -170,7 +180,7 @@ function Hero({ menuOpen, setMenuOpen, heroScale, heroOpacity }) {
   return (
     <section id="home" className="relative h-screen min-h-[42rem] overflow-hidden bg-midnight text-cream">
       <h1 className="sr-only">
-        Fetty's Junk Removal in Belle Isle and Orlando, Florida
+        Veteran-owned junk removal in Belle Isle and Orlando, Florida
       </h1>
       <motion.div
         className="absolute inset-0"
@@ -284,10 +294,10 @@ function Hero({ menuOpen, setMenuOpen, heroScale, heroOpacity }) {
         >
           <p className="dark-glass-pill mb-4 inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-bold uppercase tracking-[0.2em] text-mist/84 md:ml-auto">
             <Sparkles size={14} />
-            Belle Isle's trusted cleanup crew
+            Belle Isle & Orlando junk removal
           </p>
           <p className="max-w-md text-base leading-7 text-mist/78 sm:text-lg md:ml-auto">
-            Local junk removal, debris hauling, and cleanouts across Belle Isle, Orlando, Conway, Edgewood, and nearby neighborhoods.
+            Veteran-owned junk removal, hauling services, property cleanup, and cleanouts across Belle Isle, Orlando, Conway, Edgewood, and nearby neighborhoods.
           </p>
           <div className="mt-7 md:inline-flex md:flex-col md:items-end">
             <JobberLink className="inline-flex items-center gap-3 rounded-full bg-periwinkle/90 px-6 py-4 text-sm font-bold uppercase tracking-[0.16em] text-cream shadow-soft transition hover:-translate-y-1 hover:bg-coral hover:text-midnight">
@@ -318,7 +328,7 @@ function About() {
           </h2>
           <div className="mt-8 max-w-2xl space-y-5 text-lg leading-8 text-mist/68">
             <p>
-              We are a father-and-son team with a simple mission: help keep our community clean, one neighbor at a time. As a veteran-owned service, we bring discipline, respect, and pride into every job.
+              We are a father-and-son team with a simple mission: help keep our community clean, one neighbor at a time. As a veteran-owned junk removal service, we bring discipline, respect, and pride into every job.
             </p>
             <p>
               Whether it is a driveway, siding, patio, garage, or full property cleanup, Fetty's Junk Removal is built on honest work, dependable service, and care for the people and neighborhoods we serve.
@@ -380,7 +390,7 @@ function Services() {
             </h2>
           </div>
           <p className="max-w-md text-base leading-7 text-mist/62">
-            Junk removal services for Belle Isle, Orlando, Conway, and Edgewood homes, rentals, remodels, garages, and small job sites.
+            Local hauling services for Belle Isle, Orlando, Conway, and Edgewood homes, rentals, remodels, garages, furniture removal, and small job sites.
           </p>
         </FadeIn>
 
@@ -511,7 +521,7 @@ function Results() {
             >
               {workItems.map((item, index) => (
                 <div
-                  key={item.title}
+                  key={item.id}
                   className="w-full shrink-0 px-1 sm:px-3"
                   aria-hidden={activeIndex !== index}
                 >
@@ -559,7 +569,7 @@ function Results() {
             <div className="flex items-center justify-center gap-2.5">
               {workItems.map((item, index) => (
                 <button
-                  key={item.title}
+                  key={item.id}
                   type="button"
                   className={`h-2 rounded-full transition ${
                     activeIndex === index
@@ -567,7 +577,7 @@ function Results() {
                       : "w-2 border border-coral/[0.10] bg-coral/[0.10]"
                   }`}
                   onClick={() => goToSlide(index)}
-                  aria-label={`Show ${item.title}`}
+                  aria-label={`Show ${item.title} result ${index + 1}`}
                   aria-current={activeIndex === index ? "true" : undefined}
                 />
               ))}
@@ -585,7 +595,7 @@ function Results() {
           <div className="mt-8 hidden items-center justify-center gap-3 sm:flex">
             {workItems.map((item, index) => (
               <button
-                key={item.title}
+                key={item.id}
                 type="button"
                 className={`h-2.5 rounded-full transition ${
                   activeIndex === index
@@ -593,7 +603,7 @@ function Results() {
                     : "w-2.5 border border-coral/[0.10] bg-coral/[0.10] hover:bg-coral/22"
                 }`}
                 onClick={() => goToSlide(index)}
-                aria-label={`Show ${item.title}`}
+                aria-label={`Show ${item.title} result ${index + 1}`}
                 aria-current={activeIndex === index ? "true" : undefined}
               />
             ))}
@@ -613,7 +623,9 @@ function Results() {
 }
 
 function WorkVideoCard({ item, isActive, isSoundOn, onToggleSound, onSyncPlayback, setVideoRef }) {
+  const cardRef = useRef(null);
   const videoRef = useRef(null);
+  const shouldLoadVideo = useInView(cardRef, { once: true, margin: "360px 0px" });
 
   const assignVideoRef = (node) => {
     videoRef.current = node;
@@ -622,12 +634,14 @@ function WorkVideoCard({ item, isActive, isSoundOn, onToggleSound, onSyncPlaybac
 
   const startVideo = () => {
     const video = videoRef.current;
-    if (!video) return;
+    if (!video || !shouldLoadVideo) return;
 
     onSyncPlayback(isActive && isSoundOn);
   };
 
   useEffect(() => {
+    if (!shouldLoadVideo) return undefined;
+
     startVideo();
 
     const video = videoRef.current;
@@ -640,10 +654,11 @@ function WorkVideoCard({ item, isActive, isSoundOn, onToggleSound, onSyncPlaybac
     }, 1500);
 
     return () => window.clearInterval(playbackGuard);
-  }, [isActive, isSoundOn]);
+  }, [isActive, isSoundOn, shouldLoadVideo]);
 
   return (
     <motion.article
+      ref={cardRef}
       className={`dark-glass-card group relative overflow-hidden rounded-lg p-2 text-left transition ${
         isActive ? "shadow-[0_0_78px_rgba(77,88,143,0.14)]" : ""
       }`}
@@ -655,17 +670,17 @@ function WorkVideoCard({ item, isActive, isSoundOn, onToggleSound, onSyncPlaybac
         <video
           ref={assignVideoRef}
           className="absolute inset-0 h-full w-full object-cover transition duration-700 group-hover:scale-[1.025]"
-          src={item.src}
+          src={shouldLoadVideo ? item.src : undefined}
           poster={brandImage}
-          autoPlay
+          autoPlay={shouldLoadVideo}
           muted={!isSoundOn}
           loop
           playsInline
-          preload={isActive ? "auto" : "metadata"}
+          preload={shouldLoadVideo && isActive ? "metadata" : "none"}
           controls={false}
           onLoadedMetadata={startVideo}
           onCanPlay={startVideo}
-          aria-label={item.title}
+          aria-label={item.ariaLabel}
         />
         <div className="absolute inset-0 z-20 bg-gradient-to-t from-midnight/56 via-navy/10 to-midnight/16" />
         <div className="pointer-events-none absolute inset-0 z-20 rounded-md ring-1 ring-inset ring-white/[0.035]" />
@@ -721,7 +736,7 @@ function BeforeAfterCard({ item, isActive }) {
       <div className="relative aspect-[4/5] overflow-hidden rounded-md sm:aspect-[16/10]">
         <motion.img
           src={item.before}
-          alt={`${item.title} before junk removal in the Belle Isle and Orlando area`}
+          alt={item.beforeAlt}
           className="absolute inset-0 h-full w-full object-cover"
           loading="lazy"
           decoding="async"
@@ -730,7 +745,7 @@ function BeforeAfterCard({ item, isActive }) {
         />
         <motion.img
           src={item.after}
-          alt={`${item.title} after junk removal in the Belle Isle and Orlando area`}
+          alt={item.afterAlt}
           className="absolute inset-0 h-full w-full object-cover"
           loading="lazy"
           decoding="async"
@@ -769,7 +784,7 @@ function BookingCTA() {
             Tell us what needs to go.
           </h2>
           <p className="mt-6 max-w-xl text-lg leading-8 text-mist/66">
-            Send a few details for junk removal, debris hauling, or a cleanout in Belle Isle or nearby Orlando and the team will get back shortly.
+            Send a few details for junk removal, furniture removal, debris hauling, or property cleanup in Belle Isle or nearby Orlando and the team will get back shortly.
           </p>
           <div className="mt-8 flex">
             <JobberLink
@@ -854,7 +869,7 @@ function Footer() {
           <div>
             <p className="font-display text-3xl">Fetty's Junk Removal</p>
             <p className="mt-3 max-w-md text-mist/62">
-              Belle Isle junk removal and Orlando cleanout service with a cleaner standard and the same local identity.
+              Veteran-owned Belle Isle junk removal and Orlando cleanout service with a cleaner standard and the same local identity.
             </p>
           </div>
           <div className="grid gap-3 text-sm text-mist/70 sm:grid-cols-3">
