@@ -1,0 +1,14 @@
+node_modules
+dist
+
+# Uploaded source assets are duplicated in public/ for production serving.
+/After1.jpg
+/After2.jpg
+/Before1.jpg
+/Before2.jpg
+/Montage2.mp4
+/Reviews one.jpg
+/Reviews two.jpg
+/Construction Debris.jpg
+/Garbage.jpg
+/HouseHold Junk.jpg
