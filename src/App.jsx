@@ -472,7 +472,7 @@ function Hero({ menuOpen, setMenuOpen, heroScale, heroOpacity }) {
             src={heroPoster}
             alt=""
             aria-hidden="true"
-            className="h-full w-full object-cover brightness-[0.62] contrast-110 saturate-[0.86]"
+            className="h-full w-full object-cover"
             loading="eager"
             decoding="async"
             fetchPriority="high"
@@ -483,7 +483,7 @@ function Hero({ menuOpen, setMenuOpen, heroScale, heroOpacity }) {
         {shouldMountVideo ? (
           <video
             ref={heroVideoRef}
-            className="pointer-events-none absolute inset-0 h-full w-full object-cover brightness-[0.62] contrast-110 saturate-[0.86]"
+            className="pointer-events-none absolute inset-0 h-full w-full object-cover"
             poster={heroPoster}
             autoPlay
             muted={!heroSoundOn}
@@ -508,10 +508,10 @@ function Hero({ menuOpen, setMenuOpen, heroScale, heroOpacity }) {
           </video>
         ) : null}
       </motion.div>
-      <div className="absolute inset-0 bg-black/35" />
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_34%,rgba(3,8,18,0.5)_100%)]" />
-      <div className="absolute inset-0 bg-gradient-to-r from-midnight/72 via-transparent to-midnight/18" />
-      <div className="absolute inset-x-0 bottom-0 h-44 bg-gradient-to-t from-midnight via-midnight/58 to-transparent" />
+      <div className="absolute inset-0 bg-black/10" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_56%,rgba(0,0,0,0.18)_100%)]" />
+      <div className="absolute inset-0 bg-gradient-to-r from-black/16 via-transparent to-black/5" />
+      <div className="absolute inset-x-0 bottom-0 h-36 bg-gradient-to-t from-black/42 via-black/10 to-transparent" />
 
       {shouldMountVideo && heroHasAudio ? (
         <motion.button
