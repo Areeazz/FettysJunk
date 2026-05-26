@@ -16,7 +16,6 @@ const heroPoster = "/images/hero-poster.jpg";
 const heroPosterMobile = "/images/hero-poster-mobile.jpg";
 const brandLogo = "/images/fettys-original-logo.jpg";
 const heroVideoSources = [
-  { src: "/videos/hero-mobile.mp4", media: "(max-width: 767px)" },
   { src: "/videos/hero-desktop.mp4" },
 ];
 const heroAudioProbeByteLimit = 1024 * 1024;
@@ -750,15 +749,30 @@ function Results() {
   const [activeIndex, setActiveIndex] = useState(0);
   const [activeVideoSoundOn, setActiveVideoSoundOn] = useState(false);
   const videoRefs = useRef([]);
+  const resultsViewportRef = useRef(null);
   const itemCount = workItems.length;
 
-  const muteAllVideos = () => {
-    videoRefs.current.forEach((video) => {
-      if (!video) return;
+  const setWorkVideoAudio = (video, shouldPlaySound) => {
+    if (!video) return;
 
-      video.muted = true;
-      video.volume = 0;
-      video.play().catch(() => {});
+    const currentTime = video.currentTime;
+    video.defaultMuted = true;
+    video.muted = !shouldPlaySound;
+    setVideoVolume(video, shouldPlaySound ? 1 : 0);
+
+    if (Number.isFinite(currentTime)) {
+      video.currentTime = currentTime;
+    }
+
+    video.play().catch(() => {});
+  };
+
+  const muteAllVideos = (exceptIndex = -1) => {
+    videoRefs.current.forEach((video, index) => {
+      if (!video) return;
+      if (index === exceptIndex) return;
+
+      setWorkVideoAudio(video, false);
     });
   };
 
@@ -776,22 +790,22 @@ function Results() {
     const video = videoRefs.current[index];
     if (!video) return;
 
-    video.defaultMuted = true;
-    video.muted = !shouldPlaySound;
-    video.volume = shouldPlaySound ? 1 : 0;
-    video.play().catch(() => {});
+    setWorkVideoAudio(video, shouldPlaySound);
   };
 
   const toggleVideoSound = (index) => {
     if (index !== activeIndex) return;
 
+    const video = videoRefs.current[index];
+    if (!video) return;
+
     const nextSoundOn = !activeVideoSoundOn;
-    muteAllVideos();
 
     if (nextSoundOn) {
-      syncVideoPlayback(index, true);
+      muteAllVideos(index);
     }
 
+    setWorkVideoAudio(video, nextSoundOn);
     setActiveVideoSoundOn(nextSoundOn);
   };
 
@@ -799,6 +813,24 @@ function Results() {
     muteAllVideos();
     setActiveVideoSoundOn(false);
   }, [activeIndex]);
+
+  useEffect(() => {
+    const node = resultsViewportRef.current;
+    if (!node || !("IntersectionObserver" in window)) return undefined;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.intersectionRatio < 0.35) {
+          muteAllVideos();
+          setActiveVideoSoundOn(false);
+        }
+      },
+      { threshold: [0, 0.35, 0.6] }
+    );
+
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, []);
 
   const handleDragEnd = (_, info) => {
     const swipePower = Math.abs(info.offset.x) * info.velocity.x;
@@ -824,7 +856,7 @@ function Results() {
         </FadeIn>
 
         <FadeIn className="relative mx-auto max-w-5xl">
-          <div className="relative overflow-hidden rounded-xl">
+          <div ref={resultsViewportRef} className="relative overflow-hidden rounded-xl">
             <motion.div
               className="flex touch-pan-y"
               animate={{ x: `${activeIndex * -100}%` }}
@@ -957,20 +989,29 @@ function WorkVideoCard({ item, isActive, isSoundOn, onToggleSound, onSyncPlaybac
   useEffect(() => {
     if (!shouldLoadVideo) return undefined;
 
-    videoRef.current?.load();
-    startVideo();
-
     const video = videoRef.current;
     if (!video) return undefined;
 
+    video.defaultMuted = true;
+    video.muted = true;
+    setVideoVolume(video, 0);
+    video.load();
+    startVideo();
+
     const playbackGuard = window.setInterval(() => {
       if (video.paused) {
-        startVideo();
+        video.play().catch(() => {});
       }
     }, 1500);
 
     return () => window.clearInterval(playbackGuard);
-  }, [isActive, isSoundOn, shouldLoadVideo]);
+  }, [shouldLoadVideo]);
+
+  useEffect(() => {
+    if (!shouldLoadVideo) return;
+
+    startVideo();
+  }, [isActive, shouldLoadVideo]);
 
   return (
     <motion.article
@@ -989,7 +1030,7 @@ function WorkVideoCard({ item, isActive, isSoundOn, onToggleSound, onSyncPlaybac
             className="absolute inset-0 h-full w-full object-contain transition duration-700 group-hover:scale-[1.02] sm:object-cover"
             poster={item.poster}
             autoPlay
-            muted={!isSoundOn}
+            muted
             loop
             playsInline
             preload={isActive ? "metadata" : "none"}
