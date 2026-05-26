@@ -263,35 +263,6 @@ function FadeIn({ children, className = "", delay = 0 }) {
   );
 }
 
-function useNearViewport(ref, rootMargin = "360px 0px") {
-  const [isNearViewport, setIsNearViewport] = useState(false);
-
-  useEffect(() => {
-    const node = ref.current;
-    if (!node || isNearViewport) return undefined;
-
-    if (!("IntersectionObserver" in window)) {
-      setIsNearViewport(true);
-      return undefined;
-    }
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setIsNearViewport(true);
-          observer.disconnect();
-        }
-      },
-      { rootMargin }
-    );
-
-    observer.observe(node);
-    return () => observer.disconnect();
-  }, [isNearViewport, ref, rootMargin]);
-
-  return isNearViewport;
-}
-
 function getDisabledJobberWrapperClass(className) {
   const classes = ["relative", "cursor-not-allowed", "align-middle"];
 
@@ -747,69 +718,11 @@ function Services() {
 
 function Results() {
   const [activeIndex, setActiveIndex] = useState(0);
-  const [activeVideoSoundOn, setActiveVideoSoundOn] = useState(false);
-  const videoRefs = useRef([]);
   const itemCount = workItems.length;
 
-  const setWorkVideoMuted = (video, muted) => {
-    if (!video) return;
-
-    const currentTime = video.currentTime;
-    video.defaultMuted = true;
-    video.muted = muted;
-    setVideoVolume(video, muted ? 0 : 1);
-
-    if (Number.isFinite(currentTime)) {
-      video.currentTime = currentTime;
-    }
-
-    video.play().catch(() => {});
-  };
-
-  const muteAllVideos = (exceptIndex = -1) => {
-    videoRefs.current.forEach((video, index) => {
-      if (!video) return;
-      if (index === exceptIndex) return;
-
-      setWorkVideoMuted(video, true);
-    });
-  };
-
   const goToSlide = (index) => {
-    muteAllVideos();
-    setActiveVideoSoundOn(false);
     setActiveIndex((index + itemCount) % itemCount);
   };
-
-  const registerVideoRef = (index, node) => {
-    videoRefs.current[index] = node;
-  };
-
-  const syncVideoPlayback = (index, shouldPlaySound = false) => {
-    const video = videoRefs.current[index];
-    if (!video) return;
-
-    setWorkVideoMuted(video, !shouldPlaySound);
-  };
-
-  const toggleVideoSound = (index, event) => {
-    event?.preventDefault();
-    event?.stopPropagation();
-
-    if (index !== activeIndex) return;
-
-    const video = videoRefs.current[index];
-    if (!video) return;
-
-    const nextMuted = !video.muted;
-    setWorkVideoMuted(video, nextMuted);
-    setActiveVideoSoundOn(!nextMuted);
-  };
-
-  useEffect(() => {
-    muteAllVideos();
-    setActiveVideoSoundOn(false);
-  }, [activeIndex]);
 
   const handleDragEnd = (_, info) => {
     const swipePower = Math.abs(info.offset.x) * info.velocity.x;
@@ -855,10 +768,6 @@ function Results() {
                     <WorkVideoCard
                       item={item}
                       isActive={activeIndex === index}
-                      isSoundOn={activeIndex === index && activeVideoSoundOn}
-                      onToggleSound={(event) => toggleVideoSound(index, event)}
-                      onSyncPlayback={(shouldPlaySound) => syncVideoPlayback(index, shouldPlaySound)}
-                      setVideoRef={(node) => registerVideoRef(index, node)}
                     />
                   ) : (
                     <BeforeAfterCard item={item} isActive={activeIndex === index} />
@@ -948,53 +857,11 @@ function Results() {
   );
 }
 
-function WorkVideoCard({ item, isActive, isSoundOn, onToggleSound, onSyncPlayback, setVideoRef }) {
-  const cardRef = useRef(null);
-  const videoRef = useRef(null);
-  const shouldLoadVideo = useNearViewport(cardRef, "220px 0px");
-
-  const assignVideoRef = (node) => {
-    videoRef.current = node;
-    setVideoRef(node);
-  };
-
-  const startVideo = () => {
-    const video = videoRef.current;
-    if (!video || !shouldLoadVideo) return;
-
-    onSyncPlayback(isActive && isSoundOn);
-  };
-
-  useEffect(() => {
-    if (!shouldLoadVideo) return undefined;
-
-    const video = videoRef.current;
-    if (!video) return undefined;
-
-    video.defaultMuted = true;
-    video.muted = true;
-    setVideoVolume(video, 0);
-    video.load();
-    startVideo();
-
-    const playbackGuard = window.setInterval(() => {
-      if (video.paused) {
-        video.play().catch(() => {});
-      }
-    }, 1500);
-
-    return () => window.clearInterval(playbackGuard);
-  }, [shouldLoadVideo]);
-
-  useEffect(() => {
-    if (!shouldLoadVideo) return;
-
-    startVideo();
-  }, [isActive, shouldLoadVideo]);
+function WorkVideoCard({ item, isActive }) {
+  const videoSrc = item.sources[item.sources.length - 1].src;
 
   return (
     <motion.article
-      ref={cardRef}
       className={`dark-glass-card group relative mx-auto max-w-[28rem] overflow-hidden rounded-lg p-2 text-left transition sm:max-w-none ${
         isActive ? "shadow-[0_0_78px_rgba(77,88,143,0.14)]" : ""
       }`}
@@ -1003,42 +870,18 @@ function WorkVideoCard({ item, isActive, isSoundOn, onToggleSound, onSyncPlaybac
     >
       <div className="absolute inset-0 rounded-lg opacity-0 shadow-[0_0_70px_rgba(77,88,143,0.12)] transition duration-500 group-hover:opacity-100" />
       <div className="relative h-[clamp(360px,82vw,430px)] overflow-hidden rounded-md bg-[radial-gradient(circle_at_50%_18%,rgba(157,188,244,0.1),transparent_22rem),linear-gradient(180deg,rgba(7,17,31,0.98),rgba(10,15,25,1))] sm:aspect-[16/10] sm:h-auto">
-        {shouldLoadVideo ? (
-          <video
-            ref={assignVideoRef}
-            className="absolute inset-0 h-full w-full object-contain transition duration-700 group-hover:scale-[1.02] sm:object-cover"
-            poster={item.poster}
-            autoPlay
-            muted
-            loop
-            playsInline
-            preload={isActive ? "metadata" : "none"}
-            controls={false}
-            onLoadedMetadata={startVideo}
-            onCanPlay={startVideo}
-            aria-label={item.ariaLabel}
-          >
-            {item.sources.map((source) => (
-              <source
-                key={source.src}
-                src={source.src}
-                media={source.media}
-                type="video/mp4"
-              />
-            ))}
-          </video>
-        ) : (
-          <img
-            src={item.poster}
-            alt=""
-            aria-hidden="true"
-            className="absolute inset-0 h-full w-full object-contain opacity-90 sm:object-cover"
-            loading="lazy"
-            decoding="async"
-            width={item.posterWidth}
-            height={item.posterHeight}
-          />
-        )}
+        <video
+          src={videoSrc}
+          className="absolute inset-0 h-full w-full object-cover transition duration-700 group-hover:scale-[1.02]"
+          poster={item.poster}
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="metadata"
+          controls={false}
+          aria-label={item.ariaLabel}
+        />
         <div className="absolute inset-0 z-20 bg-gradient-to-t from-midnight/64 via-navy/18 to-midnight/24" />
         <div className="pointer-events-none absolute inset-0 z-20 rounded-md ring-1 ring-inset ring-white/[0.035]" />
         <div className="absolute inset-0 z-20 bg-[radial-gradient(circle_at_72%_16%,rgba(157,188,244,0.12),transparent_28rem)]" />
@@ -1049,24 +892,6 @@ function WorkVideoCard({ item, isActive, isSoundOn, onToggleSound, onSyncPlaybac
         <h3 className="absolute bottom-4 left-4 z-30 max-w-[58%] text-xl font-bold leading-tight text-cream sm:bottom-5 sm:left-5 sm:max-w-[70%] sm:text-3xl">
           {item.title}
         </h3>
-        <motion.button
-          type="button"
-          className="dark-glass-pill absolute bottom-3 right-3 z-30 inline-flex items-center gap-1.5 rounded-full px-3 py-2 text-[0.65rem] font-bold uppercase tracking-[0.12em] text-mist/86 transition hover:text-cream disabled:pointer-events-none disabled:opacity-60 sm:bottom-4 sm:right-4 sm:gap-2 sm:px-4 sm:py-3 sm:text-xs sm:tracking-[0.14em]"
-          onClick={onToggleSound}
-          disabled={!isActive}
-          animate={{ scale: isSoundOn ? 1.04 : 1, opacity: isSoundOn ? 1 : 0.86 }}
-          whileTap={{ scale: 0.96 }}
-          transition={{ duration: 0.25 }}
-          aria-label={isSoundOn ? `Mute ${item.title}` : `Tap for sound on ${item.title}`}
-        >
-          {isSoundOn ? (
-            <Volume2 className="h-3.5 w-3.5 sm:h-[17px] sm:w-[17px]" />
-          ) : (
-            <VolumeX className="h-3.5 w-3.5 sm:h-[17px] sm:w-[17px]" />
-          )}
-          <span className="sm:hidden">{isSoundOn ? "Mute" : "Sound"}</span>
-          <span className="hidden sm:inline">{isSoundOn ? "Mute" : "Tap for Sound"}</span>
-        </motion.button>
       </div>
     </motion.article>
   );
