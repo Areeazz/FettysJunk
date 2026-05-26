@@ -116,6 +116,17 @@ video {
   }
 }
 
+@media (max-width: 767px) {
+  section[id="about"],
+  section[id="services"],
+  section[id="work"],
+  section[id="contact"],
+  section[id="reviews"] {
+    content-visibility: auto;
+    contain-intrinsic-size: 900px;
+  }
+}
+
 @keyframes review-marquee {
   from {
     transform: translateX(0);
