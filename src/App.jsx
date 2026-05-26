@@ -28,7 +28,10 @@ const aboutImage = {
     { src: "/images/about-fettys-community-960.webp", width: 960 },
   ],
 };
-const jobberFormUrl = "https://l.jbbr.io/eOcGjij";
+// Set this to the confirmed Jobber request form URL and flip booking back on.
+const jobberFormUrl = "";
+const isJobberBookingEnabled = false;
+const bookingUnavailableMessage = "Coming soon - Booking portal being updated.";
 
 const developerCredit = {
   name: "Areeaz",
@@ -237,7 +240,34 @@ function useNearViewport(ref, rootMargin = "360px 0px") {
   return isNearViewport;
 }
 
+function getDisabledJobberWrapperClass(className) {
+  const classes = ["relative", "cursor-not-allowed", "align-middle"];
+
+  if (className.includes("hidden")) classes.push("hidden");
+  if (className.includes("w-full")) classes.push("w-full");
+  if (className.includes("md:flex")) classes.push("md:inline-flex");
+  if (!className.includes("hidden") && !className.includes("md:flex")) classes.push("inline-flex");
+
+  return classes.join(" ");
+}
+
 function JobberLink({ children, className = "", onClick, ariaLabel }) {
+  if (!isJobberBookingEnabled || !jobberFormUrl) {
+    return (
+      <span
+        className={getDisabledJobberWrapperClass(className)}
+        title={bookingUnavailableMessage}
+        role="link"
+        aria-disabled="true"
+        aria-label={`${ariaLabel || "Booking request form"}. ${bookingUnavailableMessage}`}
+      >
+        <span className={`${className} pointer-events-none select-none opacity-65 grayscale-[0.08]`}>
+          {children}
+        </span>
+      </span>
+    );
+  }
+
   return (
     <a
       href={jobberFormUrl}
@@ -985,13 +1015,14 @@ function BookingCTA() {
           <p className="mt-6 max-w-xl text-lg leading-8 text-mist/66">
             Send a few details for junk removal, furniture removal, debris hauling, or property cleanup in Belle Isle or nearby Orlando and the team will get back shortly.
           </p>
-          <div className="mt-8 flex">
+          <div className="mt-8 flex flex-col items-start gap-3">
             <JobberLink
               className="inline-flex items-center justify-center gap-3 rounded-full bg-coral/90 px-6 py-4 text-sm font-bold uppercase tracking-[0.16em] text-midnight shadow-soft transition hover:-translate-y-1 hover:bg-cream"
             >
               Free Quote
               <ArrowRight size={18} />
             </JobberLink>
+            <p className="text-sm font-medium text-mist/54">Booking portal being updated.</p>
           </div>
         </div>
         <div className="relative grid min-h-[24rem] place-items-center overflow-hidden bg-[radial-gradient(circle_at_50%_44%,rgba(157,188,244,0.18),transparent_20rem),linear-gradient(135deg,rgba(7,17,31,0.96),rgba(16,26,51,0.86))] p-10 text-center">
