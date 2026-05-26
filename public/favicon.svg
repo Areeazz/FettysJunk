@@ -1,6 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Fetty's Junk Removal">
-  <rect width="64" height="64" rx="14" fill="#07111f" />
-  <path d="M8 48c7-18 20-30 48-32-7 18-20 30-48 32Z" fill="#4d588f" opacity="0.72" />
-  <circle cx="46" cy="18" r="9" fill="#9dbcf4" opacity="0.84" />
-  <text x="31.5" y="43" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="30" font-weight="800" fill="#f5f8ff">F</text>
-</svg>
