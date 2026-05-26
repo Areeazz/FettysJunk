@@ -102,10 +102,10 @@ const workItems = [
     posterWidth: 1200,
     posterHeight: 554,
     privacyMask: {
-      left: "75.8%",
-      top: "25.6%",
-      width: "5%",
-      height: "25.8%",
+      left: "76.6%",
+      top: "24.6%",
+      width: "clamp(0.7rem, 2.7%, 2.4rem)",
+      height: "clamp(1.75rem, 18.5%, 7rem)",
     },
     ariaLabel: "Transformation video showing junk removal and property cleanup results in Belle Isle and Orlando",
   },
@@ -946,7 +946,7 @@ function PrivacyMask({ item }) {
       aria-hidden="true"
     >
       <div
-        className="absolute rounded-md border border-white/[0.08] bg-black/45 shadow-[0_10px_26px_rgba(3,8,18,0.42)] backdrop-blur-md"
+        className="absolute rounded-full border border-white/5 bg-midnight/50 shadow-sm ring-1 ring-periwinkle/10 backdrop-blur-lg"
         style={item.privacyMask}
       />
     </div>
