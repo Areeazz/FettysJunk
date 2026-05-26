@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 
 const heroPoster = "/images/hero-poster.jpg";
+const brandLogo = "/images/fettys-original-logo.jpg";
 const heroVideoSources = [
   { src: "/videos/hero-720.mp4", media: "(max-width: 767px)" },
   { src: "/videos/hero-1080.mp4" },
@@ -323,11 +324,14 @@ function Hero({ menuOpen, setMenuOpen, heroScale, heroOpacity }) {
 
       <header className="relative z-20 mx-auto flex w-full max-w-7xl items-center justify-between px-5 py-5 sm:px-8">
         <a href="#home" className="group flex items-center gap-3" aria-label="Fetty's Junk Removal home">
-          <span className="dark-glass-button grid h-11 w-11 place-items-center rounded-full font-display text-lg text-cream">
-            F
-          </span>
-          <span className="text-sm font-bold uppercase tracking-[0.2em] text-mist/82">
-            Fetty's
+          <span className="dark-glass-button flex h-14 w-32 items-center justify-center overflow-hidden rounded-lg p-2 shadow-[0_16px_44px_rgba(0,0,0,0.28)] transition group-hover:-translate-y-0.5 group-hover:shadow-[0_18px_56px_rgba(77,88,143,0.28)] sm:w-36">
+            <img
+              src={brandLogo}
+              alt="Fetty's Junk Removal truck and American flag logo"
+              className="h-full w-full object-contain"
+              loading="eager"
+              decoding="async"
+            />
           </span>
         </a>
         <nav className="hidden items-center gap-8 md:flex">
@@ -931,18 +935,12 @@ function BookingCTA() {
           >
             <div className="absolute -inset-10 rounded-full bg-coral/10 blur-3xl" />
             <img
-              src="/favicon.svg"
-              alt="Fetty's Junk Removal logo"
-              className="relative h-28 w-28 rounded-3xl border border-white/[0.08] bg-midnight/70 p-4 shadow-[0_24px_70px_rgba(0,0,0,0.34)] sm:h-36 sm:w-36"
+              src={brandLogo}
+              alt="Fetty's Junk Removal truck and American flag logo"
+              className="relative h-auto max-h-64 w-full max-w-[27rem] object-contain drop-shadow-[0_28px_56px_rgba(0,0,0,0.44)]"
               loading="lazy"
               decoding="async"
             />
-            <p className="relative mt-6 font-display text-3xl leading-none text-cream sm:text-4xl">
-              Fetty's
-            </p>
-            <p className="relative mt-3 text-xs font-bold uppercase tracking-[0.22em] text-coral/85">
-              Junk Removal
-            </p>
           </motion.div>
         </div>
       </FadeIn>
@@ -1007,6 +1005,15 @@ function Footer() {
       <div className="mx-auto max-w-7xl">
         <div className="flex flex-col gap-10 md:flex-row md:items-end md:justify-between">
           <div>
+            <div className="mb-6 inline-flex rounded-lg border border-white/[0.06] bg-white/[0.025] p-3 shadow-[0_20px_52px_rgba(0,0,0,0.28)]">
+              <img
+                src={brandLogo}
+                alt="Fetty's Junk Removal truck and American flag logo"
+                className="h-24 w-44 object-contain sm:w-52"
+                loading="lazy"
+                decoding="async"
+              />
+            </div>
             <p className="font-display text-3xl">Fetty's Junk Removal</p>
             <p className="mt-3 max-w-md text-mist/62">
               Veteran-owned Belle Isle junk removal and Orlando cleanout service with a cleaner standard and the same local identity.
