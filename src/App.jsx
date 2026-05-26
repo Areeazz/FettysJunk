@@ -337,6 +337,8 @@ function App() {
 
 function Hero({ menuOpen, setMenuOpen, heroScale, heroOpacity }) {
   const [shouldMountVideo, setShouldMountVideo] = useState(false);
+  const [heroSoundOn, setHeroSoundOn] = useState(false);
+  const heroVideoRef = useRef(null);
   const navItems = [
     { label: "About", to: "about" },
     { label: "Services", to: "services" },
@@ -355,6 +357,23 @@ function Hero({ menuOpen, setMenuOpen, heroScale, heroOpacity }) {
 
     return () => window.clearTimeout(timer);
   }, []);
+
+  const toggleHeroSound = () => {
+    const nextSoundOn = !heroSoundOn;
+    const video = heroVideoRef.current;
+
+    if (video) {
+      video.muted = !nextSoundOn;
+      try {
+        video.volume = nextSoundOn ? 1 : 0;
+      } catch {
+        // Some mobile browsers expose hardware-controlled volume only.
+      }
+      video.play().catch(() => {});
+    }
+
+    setHeroSoundOn(nextSoundOn);
+  };
 
   return (
     <section id="home" className="relative h-screen min-h-[42rem] overflow-hidden bg-midnight text-cream">
@@ -381,10 +400,11 @@ function Hero({ menuOpen, setMenuOpen, heroScale, heroOpacity }) {
         </picture>
         {shouldMountVideo ? (
           <video
+            ref={heroVideoRef}
             className="pointer-events-none absolute inset-0 h-full w-full object-cover brightness-[0.62] contrast-110 saturate-[0.86]"
             poster={heroPoster}
             autoPlay
-            muted
+            muted={!heroSoundOn}
             loop
             playsInline
             preload="metadata"
@@ -408,6 +428,22 @@ function Hero({ menuOpen, setMenuOpen, heroScale, heroOpacity }) {
       <div className="absolute inset-0 bg-gradient-to-t from-midnight/74 via-navy/10 to-midnight/28" />
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_72%_18%,rgba(157,188,244,0.26),transparent_32rem)]" />
       <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-midnight to-transparent" />
+
+      {shouldMountVideo ? (
+        <motion.button
+          type="button"
+          className={`absolute bottom-5 right-5 z-30 grid h-11 w-11 place-items-center rounded-full border border-white/[0.08] bg-midnight/55 text-mist shadow-[0_12px_32px_rgba(3,8,18,0.34)] backdrop-blur-xl transition hover:-translate-y-0.5 hover:border-coral/30 hover:text-cream hover:shadow-[0_16px_42px_rgba(77,88,143,0.22)] sm:bottom-8 sm:right-8 ${
+            heroSoundOn ? "border-coral/35 text-cream shadow-[0_0_28px_rgba(77,88,143,0.26)]" : ""
+          }`}
+          onClick={toggleHeroSound}
+          animate={{ scale: heroSoundOn ? [1, 1.05, 1] : 1 }}
+          transition={{ duration: 1.8, repeat: heroSoundOn ? Infinity : 0, repeatDelay: 1.4 }}
+          aria-label={heroSoundOn ? "Mute hero video" : "Unmute hero video"}
+          title={heroSoundOn ? "Mute video" : "Play video sound"}
+        >
+          {heroSoundOn ? <Volume2 size={18} /> : <VolumeX size={18} />}
+        </motion.button>
+      ) : null}
 
       <header className="relative z-20 mx-auto flex w-full max-w-7xl items-center justify-between px-5 py-5 sm:px-8">
         <a href="#home" className="group flex items-center gap-3" aria-label="Fetty's Junk Removal home">
