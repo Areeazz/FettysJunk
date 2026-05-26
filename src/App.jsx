@@ -101,6 +101,12 @@ const workItems = [
     poster: "/images/work-montage-2-poster.jpg",
     posterWidth: 1200,
     posterHeight: 554,
+    privacyMask: {
+      left: "75.8%",
+      top: "25.6%",
+      width: "5%",
+      height: "25.8%",
+    },
     ariaLabel: "Transformation video showing junk removal and property cleanup results in Belle Isle and Orlando",
   },
   {
@@ -894,6 +900,7 @@ function WorkVideoCard({ item, isActive, isSoundOn, onToggleSound, onSyncPlaybac
         <div className="absolute inset-0 z-20 bg-gradient-to-t from-midnight/64 via-navy/18 to-midnight/24" />
         <div className="pointer-events-none absolute inset-0 z-20 rounded-md ring-1 ring-inset ring-white/[0.035]" />
         <div className="absolute inset-0 z-20 bg-[radial-gradient(circle_at_72%_16%,rgba(157,188,244,0.12),transparent_28rem)]" />
+        <PrivacyMask item={item} />
         <span className="dark-glass-pill absolute left-3 top-3 z-30 rounded-full px-3 py-1.5 text-[0.65rem] font-bold uppercase tracking-[0.14em] text-mist/84 sm:left-4 sm:top-4 sm:px-4 sm:py-2 sm:text-xs sm:tracking-[0.18em]">
           {item.label}
         </span>
@@ -920,6 +927,29 @@ function WorkVideoCard({ item, isActive, isSoundOn, onToggleSound, onSyncPlaybac
         </motion.button>
       </div>
     </motion.article>
+  );
+}
+
+function PrivacyMask({ item }) {
+  if (!item.privacyMask) return null;
+
+  const sourceAspect = item.posterWidth / item.posterHeight;
+  const cardAspect = 16 / 10;
+
+  return (
+    <div
+      className="pointer-events-none absolute left-1/2 top-1/2 z-30 w-full max-w-none -translate-x-1/2 -translate-y-1/2 transition duration-700 group-hover:scale-[1.02] sm:h-full sm:w-[var(--privacy-mask-cover-width)]"
+      style={{
+        aspectRatio: `${item.posterWidth} / ${item.posterHeight}`,
+        "--privacy-mask-cover-width": `${(sourceAspect / cardAspect) * 100}%`,
+      }}
+      aria-hidden="true"
+    >
+      <div
+        className="absolute rounded-md border border-white/[0.08] bg-black/45 shadow-[0_10px_26px_rgba(3,8,18,0.42)] backdrop-blur-md"
+        style={item.privacyMask}
+      />
+    </div>
   );
 }
 
