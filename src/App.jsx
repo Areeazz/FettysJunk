@@ -13,13 +13,16 @@ import {
 } from "lucide-react";
 
 const heroPoster = "/images/hero-poster.jpg";
+const heroPosterMobile = "/images/hero-poster-mobile.jpg";
 const brandLogo = "/images/fettys-original-logo.jpg";
 const heroVideoSources = [
-  { src: "/videos/hero-720.mp4", media: "(max-width: 767px)" },
-  { src: "/videos/hero-1080.mp4" },
+  { src: "/videos/hero-mobile.mp4", media: "(max-width: 767px)" },
+  { src: "/videos/hero-desktop.mp4" },
 ];
 const aboutImage = {
   src: "/images/about-fettys-community.jpg",
+  width: 1200,
+  height: 900,
   webp: [
     { src: "/images/about-fettys-community-640.webp", width: 640 },
     { src: "/images/about-fettys-community-960.webp", width: 960 },
@@ -43,6 +46,8 @@ const services = [
     copy: "Final cleanup, leftover materials, and site debris handled with tidy, professional speed.",
     image: {
       src: "/images/construction-debris-service.jpg",
+      width: 1170,
+      height: 1560,
       webp: [
         { src: "/images/construction-debris-service-480.webp", width: 480 },
         { src: "/images/construction-debris-service-900.webp", width: 900 },
@@ -55,6 +60,8 @@ const services = [
     copy: "Moving, clearing, refreshing, or reclaiming space without the weekend-long headache.",
     image: {
       src: "/images/household-junk-service.jpg",
+      width: 1200,
+      height: 900,
       webp: [
         { src: "/images/household-junk-service-480.webp", width: 480 },
         { src: "/images/household-junk-service-900.webp", width: 900 },
@@ -67,6 +74,8 @@ const services = [
     copy: "Odd piles, random loads, garage corners, and the things that do not fit cleanly in a category.",
     image: {
       src: "/images/misc-garbage-service.jpg",
+      width: 768,
+      height: 1024,
       webp: [
         { src: "/images/misc-garbage-service-480.webp", width: 480 },
         { src: "/images/misc-garbage-service-768.webp", width: 768 },
@@ -87,6 +96,8 @@ const workItems = [
       { src: "/videos/work-montage-2.mp4" },
     ],
     poster: "/images/work-montage-2-poster.jpg",
+    posterWidth: 1200,
+    posterHeight: 554,
     ariaLabel: "Transformation video showing junk removal and property cleanup results in Belle Isle and Orlando",
   },
   {
@@ -99,6 +110,8 @@ const workItems = [
       { src: "/videos/results-montage.mp4" },
     ],
     poster: "/images/results-montage-poster.jpg",
+    posterWidth: 540,
+    posterHeight: 680,
     ariaLabel: "Transformation video showing veteran-owned junk removal work in the Orlando area",
   },
   {
@@ -107,6 +120,8 @@ const workItems = [
     title: "Cleanout Transformation",
     before: {
       src: "/Before1.jpg",
+      width: 1170,
+      height: 1560,
       webp: [
         { src: "/Before1-640.webp", width: 640 },
         { src: "/Before1-960.webp", width: 960 },
@@ -114,6 +129,8 @@ const workItems = [
     },
     after: {
       src: "/After1.jpg",
+      width: 1170,
+      height: 1560,
       webp: [
         { src: "/After1-640.webp", width: 640 },
         { src: "/After1-960.webp", width: 960 },
@@ -128,6 +145,8 @@ const workItems = [
     title: "Space Reclaimed",
     before: {
       src: "/Before2.jpg",
+      width: 1170,
+      height: 1560,
       webp: [
         { src: "/Before2-640.webp", width: 640 },
         { src: "/Before2-960.webp", width: 960 },
@@ -135,6 +154,8 @@ const workItems = [
     },
     after: {
       src: "/After2.jpg",
+      width: 1170,
+      height: 1560,
       webp: [
         { src: "/After2-640.webp", width: 640 },
         { src: "/After2-960.webp", width: 960 },
@@ -247,6 +268,8 @@ function ResponsiveImage({ image, alt, className = "", loading = "lazy", sizes, 
         decoding="async"
         sizes={sizes}
         fetchPriority={fetchPriority}
+        width={image.width}
+        height={image.height}
       />
     </picture>
   );
@@ -277,6 +300,7 @@ function App() {
 }
 
 function Hero({ menuOpen, setMenuOpen, heroScale, heroOpacity }) {
+  const [shouldMountVideo, setShouldMountVideo] = useState(false);
   const navItems = [
     { label: "About", to: "about" },
     { label: "Services", to: "services" },
@@ -284,6 +308,17 @@ function Hero({ menuOpen, setMenuOpen, heroScale, heroOpacity }) {
     { label: "Reviews", to: "reviews" },
     { label: "Contact", to: "contact" },
   ];
+
+  useEffect(() => {
+    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (prefersReducedMotion) return undefined;
+
+    const isMobile = window.matchMedia("(max-width: 767px)").matches;
+    const delay = isMobile ? 1100 : 120;
+    const timer = window.setTimeout(() => setShouldMountVideo(true), delay);
+
+    return () => window.clearTimeout(timer);
+  }, []);
 
   return (
     <section id="home" className="relative h-screen min-h-[42rem] overflow-hidden bg-midnight text-cream">
@@ -294,28 +329,44 @@ function Hero({ menuOpen, setMenuOpen, heroScale, heroOpacity }) {
         className="absolute inset-0"
         style={{ scale: heroScale, opacity: heroOpacity }}
       >
-        <video
-          className="pointer-events-none absolute inset-0 h-full w-full object-cover brightness-[0.62] contrast-110 saturate-[0.86]"
-          poster={heroPoster}
-          autoPlay
-          muted
-          loop
-          playsInline
-          preload="metadata"
-          controls={false}
-          disablePictureInPicture
-          controlsList="nodownload noplaybackrate nofullscreen"
-          aria-label="Fetty's Junk Removal background video"
-        >
-          {heroVideoSources.map((source) => (
-            <source
-              key={source.src}
-              src={source.src}
-              media={source.media}
-              type="video/mp4"
-            />
-          ))}
-        </video>
+        <picture className="absolute inset-0 block h-full w-full">
+          <source media="(max-width: 767px)" srcSet={heroPosterMobile} />
+          <img
+            src={heroPoster}
+            alt=""
+            aria-hidden="true"
+            className="h-full w-full object-cover brightness-[0.62] contrast-110 saturate-[0.86]"
+            loading="eager"
+            decoding="async"
+            fetchPriority="high"
+            width="540"
+            height="540"
+          />
+        </picture>
+        {shouldMountVideo ? (
+          <video
+            className="pointer-events-none absolute inset-0 h-full w-full object-cover brightness-[0.62] contrast-110 saturate-[0.86]"
+            poster={heroPoster}
+            autoPlay
+            muted
+            loop
+            playsInline
+            preload="metadata"
+            controls={false}
+            disablePictureInPicture
+            controlsList="nodownload noplaybackrate nofullscreen"
+            aria-label="Fetty's Junk Removal background video"
+          >
+            {heroVideoSources.map((source) => (
+              <source
+                key={source.src}
+                src={source.src}
+                media={source.media}
+                type="video/mp4"
+              />
+            ))}
+          </video>
+        ) : null}
       </motion.div>
       <div className="absolute inset-0 bg-gradient-to-r from-midnight/78 via-navy/48 to-periwinkle/18" />
       <div className="absolute inset-0 bg-gradient-to-t from-midnight/74 via-navy/10 to-midnight/28" />
@@ -331,6 +382,8 @@ function Hero({ menuOpen, setMenuOpen, heroScale, heroOpacity }) {
               className="h-full w-full object-contain"
               loading="eager"
               decoding="async"
+              width="1142"
+              height="912"
             />
           </span>
         </a>
@@ -729,7 +782,7 @@ function Results() {
 function WorkVideoCard({ item, isActive, isSoundOn, onToggleSound, onSyncPlayback, setVideoRef }) {
   const cardRef = useRef(null);
   const videoRef = useRef(null);
-  const shouldLoadVideo = useNearViewport(cardRef);
+  const shouldLoadVideo = useNearViewport(cardRef, "220px 0px");
 
   const assignVideoRef = (node) => {
     videoRef.current = node;
@@ -764,40 +817,51 @@ function WorkVideoCard({ item, isActive, isSoundOn, onToggleSound, onSyncPlaybac
   return (
     <motion.article
       ref={cardRef}
-      className={`dark-glass-card group relative overflow-hidden rounded-lg p-2 text-left transition ${
+      className={`dark-glass-card group relative mx-auto max-w-[28rem] overflow-hidden rounded-lg p-2 text-left transition sm:max-w-none ${
         isActive ? "shadow-[0_0_78px_rgba(77,88,143,0.14)]" : ""
       }`}
       whileHover={{ y: -5, scale: 1.02 }}
       transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
     >
       <div className="absolute inset-0 rounded-lg opacity-0 shadow-[0_0_70px_rgba(77,88,143,0.12)] transition duration-500 group-hover:opacity-100" />
-      <div className="relative aspect-[4/5] overflow-hidden rounded-md bg-midnight sm:aspect-[16/10]">
-        <video
-          ref={assignVideoRef}
-          className="absolute inset-0 h-full w-full object-cover transition duration-700 group-hover:scale-[1.025]"
-          poster={item.poster}
-          autoPlay={shouldLoadVideo}
-          muted={!isSoundOn}
-          loop
-          playsInline
-          preload={shouldLoadVideo && isActive ? "metadata" : "none"}
-          controls={false}
-          onLoadedMetadata={startVideo}
-          onCanPlay={startVideo}
-          aria-label={item.ariaLabel}
-        >
-          {shouldLoadVideo
-            ? item.sources.map((source) => (
-                <source
-                  key={source.src}
-                  src={source.src}
-                  media={source.media}
-                  type="video/mp4"
-                />
-              ))
-            : null}
-        </video>
-        <div className="absolute inset-0 z-20 bg-gradient-to-t from-midnight/56 via-navy/10 to-midnight/16" />
+      <div className="relative h-[clamp(360px,82vw,430px)] overflow-hidden rounded-md bg-[radial-gradient(circle_at_50%_18%,rgba(157,188,244,0.1),transparent_22rem),linear-gradient(180deg,rgba(7,17,31,0.98),rgba(10,15,25,1))] sm:aspect-[16/10] sm:h-auto">
+        {shouldLoadVideo ? (
+          <video
+            ref={assignVideoRef}
+            className="absolute inset-0 h-full w-full object-contain transition duration-700 group-hover:scale-[1.02] sm:object-cover"
+            poster={item.poster}
+            autoPlay
+            muted={!isSoundOn}
+            loop
+            playsInline
+            preload={isActive ? "metadata" : "none"}
+            controls={false}
+            onLoadedMetadata={startVideo}
+            onCanPlay={startVideo}
+            aria-label={item.ariaLabel}
+          >
+            {item.sources.map((source) => (
+              <source
+                key={source.src}
+                src={source.src}
+                media={source.media}
+                type="video/mp4"
+              />
+            ))}
+          </video>
+        ) : (
+          <img
+            src={item.poster}
+            alt=""
+            aria-hidden="true"
+            className="absolute inset-0 h-full w-full object-contain opacity-90 sm:object-cover"
+            loading="lazy"
+            decoding="async"
+            width={item.posterWidth}
+            height={item.posterHeight}
+          />
+        )}
+        <div className="absolute inset-0 z-20 bg-gradient-to-t from-midnight/64 via-navy/18 to-midnight/24" />
         <div className="pointer-events-none absolute inset-0 z-20 rounded-md ring-1 ring-inset ring-white/[0.035]" />
         <div className="absolute inset-0 z-20 bg-[radial-gradient(circle_at_72%_16%,rgba(157,188,244,0.12),transparent_28rem)]" />
         <span className="dark-glass-pill absolute left-3 top-3 z-30 rounded-full px-3 py-1.5 text-[0.65rem] font-bold uppercase tracking-[0.14em] text-mist/84 sm:left-4 sm:top-4 sm:px-4 sm:py-2 sm:text-xs sm:tracking-[0.18em]">
@@ -835,7 +899,7 @@ function BeforeAfterCard({ item, isActive }) {
   return (
     <motion.button
       type="button"
-      className={`dark-glass-card group relative block w-full overflow-hidden rounded-lg p-2 text-left transition focus:outline-none focus:ring-2 focus:ring-coral/30 ${
+      className={`dark-glass-card group relative mx-auto block w-full max-w-[28rem] overflow-hidden rounded-lg p-2 text-left transition focus:outline-none focus:ring-2 focus:ring-coral/30 sm:max-w-none ${
         isActive ? "shadow-[0_0_78px_rgba(77,88,143,0.13)]" : ""
       }`}
       onClick={() => setShowAfter((value) => !value)}
@@ -848,7 +912,7 @@ function BeforeAfterCard({ item, isActive }) {
       transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
       aria-label={`${item.title} before and after transformation`}
     >
-      <div className="relative aspect-[4/5] overflow-hidden rounded-md sm:aspect-[16/10]">
+      <div className="relative h-[clamp(360px,82vw,430px)] overflow-hidden rounded-md sm:aspect-[16/10] sm:h-auto">
         <picture className="absolute inset-0 block h-full w-full">
           <source
             type="image/webp"
@@ -862,6 +926,8 @@ function BeforeAfterCard({ item, isActive }) {
             loading="lazy"
             decoding="async"
             sizes="(min-width: 768px) 70vw, 100vw"
+            width={item.before.width}
+            height={item.before.height}
             animate={{ opacity: showAfter ? 0 : 1, scale: showAfter ? 1.04 : 1 }}
             transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
           />
@@ -879,6 +945,8 @@ function BeforeAfterCard({ item, isActive }) {
             loading="lazy"
             decoding="async"
             sizes="(min-width: 768px) 70vw, 100vw"
+            width={item.after.width}
+            height={item.after.height}
             animate={{ opacity: showAfter ? 1 : 0, scale: showAfter ? 1.045 : 1 }}
             transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
           />
@@ -940,6 +1008,8 @@ function BookingCTA() {
               className="relative h-auto max-h-64 w-full max-w-[27rem] object-contain drop-shadow-[0_28px_56px_rgba(0,0,0,0.44)]"
               loading="lazy"
               decoding="async"
+              width="1142"
+              height="912"
             />
           </motion.div>
         </div>
@@ -1012,6 +1082,8 @@ function Footer() {
                 className="h-24 w-44 object-contain sm:w-52"
                 loading="lazy"
                 decoding="async"
+                width="1142"
+                height="912"
               />
             </div>
             <p className="font-display text-3xl">Fetty's Junk Removal</p>
