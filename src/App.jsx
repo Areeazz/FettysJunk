@@ -19,6 +19,53 @@ const heroVideoSources = [
   { src: "/videos/hero-mobile.mp4", media: "(max-width: 767px)" },
   { src: "/videos/hero-desktop.mp4" },
 ];
+const heroAudioProbeByteLimit = 1024 * 1024;
+
+function mp4BufferHasAudioTrack(buffer) {
+  const bytes = new Uint8Array(buffer);
+
+  for (let index = 0; index <= bytes.length - 16; index += 1) {
+    const isHandlerAtom =
+      bytes[index] === 0x68 &&
+      bytes[index + 1] === 0x64 &&
+      bytes[index + 2] === 0x6c &&
+      bytes[index + 3] === 0x72;
+    const isAudioHandler =
+      bytes[index + 12] === 0x73 &&
+      bytes[index + 13] === 0x6f &&
+      bytes[index + 14] === 0x75 &&
+      bytes[index + 15] === 0x6e;
+
+    if (isHandlerAtom && isAudioHandler) return true;
+  }
+
+  return false;
+}
+
+async function heroSourceHasAudioTrack(src) {
+  if (!src) return false;
+
+  try {
+    const response = await fetch(src, {
+      headers: { Range: `bytes=0-${heroAudioProbeByteLimit - 1}` },
+    });
+
+    if (!response.ok && response.status !== 206) return false;
+
+    return mp4BufferHasAudioTrack(await response.arrayBuffer());
+  } catch {
+    return false;
+  }
+}
+
+function setVideoVolume(video, volume) {
+  try {
+    video.volume = volume;
+  } catch {
+    // Mobile Safari can expose hardware-controlled volume only.
+  }
+}
+
 const aboutImage = {
   src: "/images/about-fettys-community.jpg",
   width: 1200,
@@ -338,7 +385,9 @@ function App() {
 function Hero({ menuOpen, setMenuOpen, heroScale, heroOpacity }) {
   const [shouldMountVideo, setShouldMountVideo] = useState(false);
   const [heroSoundOn, setHeroSoundOn] = useState(false);
+  const [heroHasAudio, setHeroHasAudio] = useState(false);
   const heroVideoRef = useRef(null);
+  const heroAudioProbeRef = useRef(0);
   const navItems = [
     { label: "About", to: "about" },
     { label: "Services", to: "services" },
@@ -358,21 +407,54 @@ function Hero({ menuOpen, setMenuOpen, heroScale, heroOpacity }) {
     return () => window.clearTimeout(timer);
   }, []);
 
-  const toggleHeroSound = () => {
-    const nextSoundOn = !heroSoundOn;
+  const handleHeroLoadedMetadata = () => {
     const video = heroVideoRef.current;
+    if (!video) return;
 
-    if (video) {
-      video.muted = !nextSoundOn;
-      try {
-        video.volume = nextSoundOn ? 1 : 0;
-      } catch {
-        // Some mobile browsers expose hardware-controlled volume only.
+    const probeId = heroAudioProbeRef.current + 1;
+    heroAudioProbeRef.current = probeId;
+    setHeroHasAudio(false);
+    setHeroSoundOn(false);
+    video.defaultMuted = true;
+    video.muted = true;
+    setVideoVolume(video, 0);
+
+    heroSourceHasAudioTrack(video.currentSrc).then((hasAudio) => {
+      if (heroAudioProbeRef.current === probeId) {
+        setHeroHasAudio(hasAudio);
       }
+    });
+  };
+
+  const handleHeroVideoError = () => {
+    heroAudioProbeRef.current += 1;
+    setHeroHasAudio(false);
+    setHeroSoundOn(false);
+  };
+
+  const toggleHeroSound = async () => {
+    const video = heroVideoRef.current;
+    if (!video || !heroHasAudio) return;
+
+    if (heroSoundOn) {
+      video.muted = true;
+      setVideoVolume(video, 0);
+      setHeroSoundOn(false);
       video.play().catch(() => {});
+      return;
     }
 
-    setHeroSoundOn(nextSoundOn);
+    video.muted = false;
+    setVideoVolume(video, 1);
+
+    try {
+      await video.play();
+      setHeroSoundOn(true);
+    } catch {
+      video.muted = true;
+      setVideoVolume(video, 0);
+      setHeroSoundOn(false);
+    }
   };
 
   return (
@@ -411,6 +493,8 @@ function Hero({ menuOpen, setMenuOpen, heroScale, heroOpacity }) {
             controls={false}
             disablePictureInPicture
             controlsList="nodownload noplaybackrate nofullscreen"
+            onLoadedMetadata={handleHeroLoadedMetadata}
+            onError={handleHeroVideoError}
             aria-label="Fetty's Junk Removal background video"
           >
             {heroVideoSources.map((source) => (
@@ -424,18 +508,19 @@ function Hero({ menuOpen, setMenuOpen, heroScale, heroOpacity }) {
           </video>
         ) : null}
       </motion.div>
-      <div className="absolute inset-0 bg-gradient-to-r from-midnight/78 via-navy/48 to-periwinkle/18" />
-      <div className="absolute inset-0 bg-gradient-to-t from-midnight/74 via-navy/10 to-midnight/28" />
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_72%_18%,rgba(157,188,244,0.26),transparent_32rem)]" />
-      <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-midnight to-transparent" />
+      <div className="absolute inset-0 bg-black/35" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_34%,rgba(3,8,18,0.5)_100%)]" />
+      <div className="absolute inset-0 bg-gradient-to-r from-midnight/72 via-transparent to-midnight/18" />
+      <div className="absolute inset-x-0 bottom-0 h-44 bg-gradient-to-t from-midnight via-midnight/58 to-transparent" />
 
-      {shouldMountVideo ? (
+      {shouldMountVideo && heroHasAudio ? (
         <motion.button
           type="button"
-          className={`absolute bottom-5 right-5 z-30 grid h-11 w-11 place-items-center rounded-full border border-white/[0.08] bg-midnight/55 text-mist shadow-[0_12px_32px_rgba(3,8,18,0.34)] backdrop-blur-xl transition hover:-translate-y-0.5 hover:border-coral/30 hover:text-cream hover:shadow-[0_16px_42px_rgba(77,88,143,0.22)] sm:bottom-8 sm:right-8 ${
-            heroSoundOn ? "border-coral/35 text-cream shadow-[0_0_28px_rgba(77,88,143,0.26)]" : ""
+          className={`absolute bottom-5 right-5 z-30 grid h-11 w-11 place-items-center rounded-full border border-white/[0.08] bg-midnight/58 text-mist shadow-[0_14px_34px_rgba(0,0,0,0.36)] backdrop-blur-xl transition hover:-translate-y-0.5 hover:border-white/20 hover:text-cream hover:shadow-[0_16px_38px_rgba(15,23,42,0.44)] sm:bottom-8 sm:right-8 ${
+            heroSoundOn ? "border-cream/20 text-cream shadow-[0_0_22px_rgba(245,248,255,0.12)]" : ""
           }`}
           onClick={toggleHeroSound}
+          aria-pressed={heroSoundOn}
           animate={{ scale: heroSoundOn ? [1, 1.05, 1] : 1 }}
           transition={{ duration: 1.8, repeat: heroSoundOn ? Infinity : 0, repeatDelay: 1.4 }}
           aria-label={heroSoundOn ? "Mute hero video" : "Unmute hero video"}
