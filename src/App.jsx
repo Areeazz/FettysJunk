@@ -749,16 +749,15 @@ function Results() {
   const [activeIndex, setActiveIndex] = useState(0);
   const [activeVideoSoundOn, setActiveVideoSoundOn] = useState(false);
   const videoRefs = useRef([]);
-  const resultsViewportRef = useRef(null);
   const itemCount = workItems.length;
 
-  const setWorkVideoAudio = (video, shouldPlaySound) => {
+  const setWorkVideoMuted = (video, muted) => {
     if (!video) return;
 
     const currentTime = video.currentTime;
     video.defaultMuted = true;
-    video.muted = !shouldPlaySound;
-    setVideoVolume(video, shouldPlaySound ? 1 : 0);
+    video.muted = muted;
+    setVideoVolume(video, muted ? 0 : 1);
 
     if (Number.isFinite(currentTime)) {
       video.currentTime = currentTime;
@@ -772,7 +771,7 @@ function Results() {
       if (!video) return;
       if (index === exceptIndex) return;
 
-      setWorkVideoAudio(video, false);
+      setWorkVideoMuted(video, true);
     });
   };
 
@@ -790,47 +789,27 @@ function Results() {
     const video = videoRefs.current[index];
     if (!video) return;
 
-    setWorkVideoAudio(video, shouldPlaySound);
+    setWorkVideoMuted(video, !shouldPlaySound);
   };
 
-  const toggleVideoSound = (index) => {
+  const toggleVideoSound = (index, event) => {
+    event?.preventDefault();
+    event?.stopPropagation();
+
     if (index !== activeIndex) return;
 
     const video = videoRefs.current[index];
     if (!video) return;
 
-    const nextSoundOn = !activeVideoSoundOn;
-
-    if (nextSoundOn) {
-      muteAllVideos(index);
-    }
-
-    setWorkVideoAudio(video, nextSoundOn);
-    setActiveVideoSoundOn(nextSoundOn);
+    const nextMuted = !video.muted;
+    setWorkVideoMuted(video, nextMuted);
+    setActiveVideoSoundOn(!nextMuted);
   };
 
   useEffect(() => {
     muteAllVideos();
     setActiveVideoSoundOn(false);
   }, [activeIndex]);
-
-  useEffect(() => {
-    const node = resultsViewportRef.current;
-    if (!node || !("IntersectionObserver" in window)) return undefined;
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.intersectionRatio < 0.35) {
-          muteAllVideos();
-          setActiveVideoSoundOn(false);
-        }
-      },
-      { threshold: [0, 0.35, 0.6] }
-    );
-
-    observer.observe(node);
-    return () => observer.disconnect();
-  }, []);
 
   const handleDragEnd = (_, info) => {
     const swipePower = Math.abs(info.offset.x) * info.velocity.x;
@@ -856,7 +835,7 @@ function Results() {
         </FadeIn>
 
         <FadeIn className="relative mx-auto max-w-5xl">
-          <div ref={resultsViewportRef} className="relative overflow-hidden rounded-xl">
+          <div className="relative overflow-hidden rounded-xl">
             <motion.div
               className="flex touch-pan-y"
               animate={{ x: `${activeIndex * -100}%` }}
@@ -877,7 +856,7 @@ function Results() {
                       item={item}
                       isActive={activeIndex === index}
                       isSoundOn={activeIndex === index && activeVideoSoundOn}
-                      onToggleSound={() => toggleVideoSound(index)}
+                      onToggleSound={(event) => toggleVideoSound(index, event)}
                       onSyncPlayback={(shouldPlaySound) => syncVideoPlayback(index, shouldPlaySound)}
                       setVideoRef={(node) => registerVideoRef(index, node)}
                     />
