@@ -411,11 +411,12 @@ function Hero({ menuOpen, setMenuOpen, heroScale, heroOpacity }) {
 
       <header className="relative z-20 mx-auto flex w-full max-w-7xl items-center justify-between px-5 py-5 sm:px-8">
         <a href="#home" className="group flex items-center gap-3" aria-label="Fetty's Junk Removal home">
-          <span className="dark-glass-button flex h-14 w-32 items-center justify-center overflow-hidden rounded-lg p-2 shadow-[0_16px_44px_rgba(0,0,0,0.28)] transition group-hover:-translate-y-0.5 group-hover:shadow-[0_18px_56px_rgba(77,88,143,0.28)] sm:w-36">
+          <span className="relative flex h-16 w-40 items-center justify-center overflow-hidden rounded-lg border border-white/[0.10] bg-[linear-gradient(145deg,rgba(6,12,24,0.68),rgba(20,35,64,0.46))] p-1.5 shadow-[0_18px_46px_rgba(3,8,18,0.36),inset_0_1px_0_rgba(255,255,255,0.06)] backdrop-blur-xl transition group-hover:-translate-y-0.5 group-hover:border-coral/25 group-hover:shadow-[0_20px_58px_rgba(77,88,143,0.26)] sm:h-[4.5rem] sm:w-44">
+            <span className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_42%,rgba(157,188,244,0.18),transparent_68%)]" />
             <img
               src={brandLogo}
               alt="Fetty's Junk Removal truck and American flag logo"
-              className="h-full w-full object-contain"
+              className="relative z-10 h-full w-full object-contain brightness-125 contrast-[1.08] saturate-[1.08] drop-shadow-[0_4px_14px_rgba(245,248,255,0.16)]"
               loading="eager"
               decoding="async"
               width="1142"
@@ -1136,11 +1137,13 @@ function Footer() {
       <div className="mx-auto max-w-7xl">
         <div className="flex flex-col gap-10 md:flex-row md:items-end md:justify-between">
           <div>
-            <div className="mb-6 inline-flex rounded-lg border border-white/[0.06] bg-white/[0.025] p-3 shadow-[0_20px_52px_rgba(0,0,0,0.28)]">
+            <div className="relative mb-8 inline-flex overflow-hidden rounded-xl border border-white/[0.08] bg-[linear-gradient(145deg,rgba(7,17,31,0.86),rgba(20,35,64,0.48))] p-5 shadow-[0_24px_70px_rgba(3,8,18,0.34),inset_0_1px_0_rgba(255,255,255,0.055)]">
+              <div className="pointer-events-none absolute -inset-10 bg-[radial-gradient(circle_at_50%_45%,rgba(157,188,244,0.22),transparent_58%)]" />
+              <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.045),transparent_38%,rgba(77,88,143,0.08))]" />
               <img
                 src={brandLogo}
                 alt="Fetty's Junk Removal truck and American flag logo"
-                className="h-24 w-44 object-contain sm:w-52"
+                className="relative h-32 w-56 object-contain brightness-125 contrast-[1.08] saturate-[1.08] drop-shadow-[0_12px_30px_rgba(157,188,244,0.16)] sm:h-36 sm:w-64"
                 loading="lazy"
                 decoding="async"
                 width="1142"
