@@ -1,16 +1,16 @@
 # Fetty's Junk Removal Landing Page
 
-Premium Vite/React landing page for Fetty's Junk Removal. The site is designed as a trust-building page for paid traffic and redirects quote requests directly to Jobber.
+Premium Vite/React landing page for Fetty's Junk Removal. The site is a trust-building page for paid traffic. Quote and booking buttons use the Jobber request form when it is configured, and call the business phone until then.
 
-## Lead Capture
+## Quote and booking link
 
-All quote and booking CTAs redirect to the secure Jobber request form:
+The quote/booking link is configured in `src/App.jsx` (`jobberFormUrl`).
 
-```txt
-https://l.jbbr.io/eOcGjij
-```
+That value must be a Jobber online request form link. It must never be a client quote link, a client hub link, or any URL that opens one customer's quote.
 
-The site does not store customer lead information. Jobber handles name, phone, email, address, service details, and follow-up.
+Leave `jobberFormUrl` empty and keep `isJobberBookingEnabled` set to `false` until the real request-form URL is ready. While booking is disabled, quote and booking buttons call (425) 359-7073.
+
+The site does not store customer lead information. When the request form is enabled, Jobber handles name, phone, email, address, service details, and follow-up.
 
 ## Local Development
 

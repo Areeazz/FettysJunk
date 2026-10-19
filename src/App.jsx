@@ -5,7 +5,9 @@ import {
   ChevronLeft,
   ChevronRight,
   Check,
+  Mail,
   Menu,
+  Phone,
   Sparkles,
   Volume2,
   VolumeX,
@@ -16,6 +18,7 @@ const heroPoster = "/images/hero-poster.jpg";
 const heroPosterMobile = "/images/hero-poster-mobile.jpg";
 const brandLogo = "/images/fettys-original-logo.jpg";
 const heroVideoSources = [
+  { src: "/videos/hero-mobile.mp4", media: "(max-width: 767px)" },
   { src: "/videos/hero-desktop.mp4" },
 ];
 const heroAudioProbeByteLimit = 1024 * 1024;
@@ -74,10 +77,14 @@ const aboutImage = {
     { src: "/images/about-fettys-community-960.webp", width: 960 },
   ],
 };
-// Set this to the confirmed Jobber request form URL and flip booking back on.
+const phoneHref = "tel:+14253597073";
+const phoneDisplay = "(425) 359-7073";
+const emailHref = "mailto:info@fettysrentals.com";
+const emailDisplay = "info@fettysrentals.com";
+// jobberFormUrl must be a Jobber online request form link, never a client quote or client hub link.
+// Leave it empty and keep isJobberBookingEnabled false until that request-form URL is confirmed.
 const jobberFormUrl = "";
 const isJobberBookingEnabled = false;
-const bookingUnavailableMessage = "Coming soon - Booking portal being updated.";
 
 const developerCredit = {
   name: "Areeaz",
@@ -263,31 +270,17 @@ function FadeIn({ children, className = "", delay = 0 }) {
   );
 }
 
-function getDisabledJobberWrapperClass(className) {
-  const classes = ["relative", "cursor-not-allowed", "align-middle"];
-
-  if (className.includes("hidden")) classes.push("hidden");
-  if (className.includes("w-full")) classes.push("w-full");
-  if (className.includes("md:flex")) classes.push("md:inline-flex");
-  if (!className.includes("hidden") && !className.includes("md:flex")) classes.push("inline-flex");
-
-  return classes.join(" ");
-}
-
 function JobberLink({ children, className = "", onClick, ariaLabel }) {
   if (!isJobberBookingEnabled || !jobberFormUrl) {
     return (
-      <span
-        className={getDisabledJobberWrapperClass(className)}
-        title={bookingUnavailableMessage}
-        role="link"
-        aria-disabled="true"
-        aria-label={`${ariaLabel || "Booking request form"}. ${bookingUnavailableMessage}`}
+      <a
+        href={phoneHref}
+        className={className}
+        onClick={onClick}
+        aria-label={`Call ${phoneDisplay}`}
       >
-        <span className={`${className} pointer-events-none select-none opacity-65 grayscale-[0.08]`}>
-          {children}
-        </span>
-      </span>
+        {children}
+      </a>
     );
   }
 
@@ -335,20 +328,30 @@ function App() {
   const heroOpacity = useTransform(scrollYProgress, [0, 0.2], [1, 0.48]);
 
   return (
-    <main className="min-h-screen overflow-hidden bg-midnight text-ink">
-      <Hero
-        menuOpen={menuOpen}
-        setMenuOpen={setMenuOpen}
-        heroScale={heroScale}
-        heroOpacity={heroOpacity}
-      />
-      <About />
-      <Services />
-      <Results />
-      <BookingCTA />
-      <Testimonials />
-      <Footer />
-    </main>
+    <>
+      <main className="min-h-screen overflow-hidden bg-midnight text-ink">
+        <Hero
+          menuOpen={menuOpen}
+          setMenuOpen={setMenuOpen}
+          heroScale={heroScale}
+          heroOpacity={heroOpacity}
+        />
+        <About />
+        <Services />
+        <Results />
+        <BookingCTA />
+        <Testimonials />
+        <Footer />
+      </main>
+      <a
+        href={phoneHref}
+        className="fixed inset-x-0 bottom-0 z-50 flex items-center justify-center gap-2 border-t border-white/10 bg-periwinkle px-4 pt-3.5 text-sm font-bold uppercase tracking-[0.14em] text-cream shadow-[0_-12px_36px_rgba(3,8,18,0.45)] lg:hidden"
+        style={{ paddingBottom: "max(0.875rem, env(safe-area-inset-bottom))" }}
+      >
+        <Phone size={18} aria-hidden="true" />
+        Call {phoneDisplay}
+      </a>
+    </>
   );
 }
 
@@ -356,6 +359,9 @@ function Hero({ menuOpen, setMenuOpen, heroScale, heroOpacity }) {
   const [shouldMountVideo, setShouldMountVideo] = useState(false);
   const [heroSoundOn, setHeroSoundOn] = useState(false);
   const [heroHasAudio, setHeroHasAudio] = useState(false);
+  const [heroPosterSrc, setHeroPosterSrc] = useState(() =>
+    window.matchMedia("(max-width: 767px)").matches ? heroPosterMobile : heroPoster
+  );
   const heroVideoRef = useRef(null);
   const heroAudioProbeRef = useRef(0);
   const navItems = [
@@ -367,14 +373,26 @@ function Hero({ menuOpen, setMenuOpen, heroScale, heroOpacity }) {
   ];
 
   useEffect(() => {
-    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (prefersReducedMotion) return undefined;
+    const mobileQuery = window.matchMedia("(max-width: 767px)");
+    const syncHeroPoster = () => {
+      setHeroPosterSrc(mobileQuery.matches ? heroPosterMobile : heroPoster);
+    };
 
-    const isMobile = window.matchMedia("(max-width: 767px)").matches;
-    const delay = isMobile ? 1100 : 120;
+    syncHeroPoster();
+    mobileQuery.addEventListener("change", syncHeroPoster);
+
+    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (prefersReducedMotion) {
+      return () => mobileQuery.removeEventListener("change", syncHeroPoster);
+    }
+
+    const delay = mobileQuery.matches ? 1100 : 120;
     const timer = window.setTimeout(() => setShouldMountVideo(true), delay);
 
-    return () => window.clearTimeout(timer);
+    return () => {
+      window.clearTimeout(timer);
+      mobileQuery.removeEventListener("change", syncHeroPoster);
+    };
   }, []);
 
   const handleHeroLoadedMetadata = () => {
@@ -429,9 +447,6 @@ function Hero({ menuOpen, setMenuOpen, heroScale, heroOpacity }) {
 
   return (
     <section id="home" className="relative h-screen min-h-[42rem] overflow-hidden bg-midnight text-cream">
-      <h1 className="sr-only">
-        Veteran-owned junk removal in Belle Isle and Orlando, Florida
-      </h1>
       <motion.div
         className="absolute inset-0"
         style={{ scale: heroScale, opacity: heroOpacity }}
@@ -454,7 +469,7 @@ function Hero({ menuOpen, setMenuOpen, heroScale, heroOpacity }) {
           <video
             ref={heroVideoRef}
             className="pointer-events-none absolute inset-0 h-full w-full object-cover"
-            poster={heroPoster}
+            poster={heroPosterSrc}
             autoPlay
             muted={!heroSoundOn}
             loop
@@ -481,12 +496,12 @@ function Hero({ menuOpen, setMenuOpen, heroScale, heroOpacity }) {
       <div className="absolute inset-0 bg-black/10" />
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_56%,rgba(0,0,0,0.18)_100%)]" />
       <div className="absolute inset-0 bg-gradient-to-r from-black/16 via-transparent to-black/5" />
-      <div className="absolute inset-x-0 bottom-0 h-36 bg-gradient-to-t from-black/42 via-black/10 to-transparent" />
+      <div className="absolute inset-x-0 bottom-0 h-80 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
 
       {shouldMountVideo && heroHasAudio ? (
         <motion.button
           type="button"
-          className={`absolute bottom-5 right-5 z-30 grid h-11 w-11 place-items-center rounded-full border border-white/[0.08] bg-midnight/58 text-mist shadow-[0_14px_34px_rgba(0,0,0,0.36)] backdrop-blur-xl transition hover:-translate-y-0.5 hover:border-white/20 hover:text-cream hover:shadow-[0_16px_38px_rgba(15,23,42,0.44)] sm:bottom-8 sm:right-8 ${
+          className={`absolute bottom-20 right-5 z-30 grid h-11 w-11 place-items-center rounded-full border border-white/[0.08] bg-midnight/58 text-mist shadow-[0_14px_34px_rgba(0,0,0,0.36)] backdrop-blur-xl transition hover:-translate-y-0.5 hover:border-white/20 hover:text-cream hover:shadow-[0_16px_38px_rgba(15,23,42,0.44)] lg:bottom-8 lg:right-8 ${
             heroSoundOn ? "border-cream/20 text-cream shadow-[0_0_22px_rgba(245,248,255,0.12)]" : ""
           }`}
           onClick={toggleHeroSound}
@@ -526,13 +541,22 @@ function Hero({ menuOpen, setMenuOpen, heroScale, heroOpacity }) {
             </a>
           ))}
         </nav>
-        <JobberLink
-          className="dark-glass-pill hidden items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold text-mist/86 transition hover:-translate-y-0.5 hover:text-cream md:flex"
-          ariaLabel="Get a free quote in Jobber"
-        >
-          Get Quote
-          <ArrowRight size={16} />
-        </JobberLink>
+        <div className="hidden items-center gap-3 md:flex">
+          <a
+            href={phoneHref}
+            className="dark-glass-pill hidden items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold text-mist/86 transition hover:-translate-y-0.5 hover:text-cream lg:inline-flex"
+          >
+            <Phone size={15} aria-hidden="true" />
+            {phoneDisplay}
+          </a>
+          <JobberLink
+            className="dark-glass-pill inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold text-mist/86 transition hover:-translate-y-0.5 hover:text-cream"
+            ariaLabel="Get a free quote"
+          >
+            Get Quote
+            <ArrowRight size={16} />
+          </JobberLink>
+        </div>
         <button
           className="dark-glass-button grid h-11 w-11 place-items-center rounded-full text-mist md:hidden"
           onClick={() => setMenuOpen((value) => !value)}
@@ -570,25 +594,35 @@ function Hero({ menuOpen, setMenuOpen, heroScale, heroOpacity }) {
         </motion.nav>
       )}
 
-      <div className="relative z-10 mx-auto flex h-[calc(100%-88px)] max-w-7xl items-end px-5 pb-20 pt-8 sm:px-8 sm:pb-24 md:justify-end">
+      <div className="relative z-10 mx-auto flex h-[calc(100%-88px)] max-w-7xl items-end px-5 pb-28 pt-8 sm:px-8 md:justify-end lg:pb-24">
         <motion.div
-          className="max-w-sm md:max-w-md md:text-right"
+          className="max-w-xl md:text-right"
           initial={{ opacity: 0, y: 32 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
         >
-          <p className="dark-glass-pill mb-4 inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-bold uppercase tracking-[0.2em] text-mist/84 md:ml-auto">
+          <h1 className="font-display text-[2.05rem] leading-[0.92] text-cream drop-shadow-[0_2px_18px_rgba(0,0,0,0.72)] sm:text-5xl md:text-[3.15rem]">
+            Junk Removal in Belle Isle & Orlando, FL
+          </h1>
+          <p className="dark-glass-pill mt-4 inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-bold uppercase tracking-[0.18em] text-mist/84 md:ml-auto">
             <Sparkles size={14} />
-            Belle Isle & Orlando junk removal
+            Veteran-Owned • Father & Son
           </p>
-          <p className="max-w-md text-base leading-7 text-mist/78 sm:text-lg md:ml-auto">
+          <p className="mt-4 max-w-md text-base leading-7 text-mist/86 drop-shadow-[0_2px_12px_rgba(0,0,0,0.7)] sm:text-lg md:ml-auto">
             Veteran-owned junk removal, hauling services, property cleanup, and cleanouts across Belle Isle, Orlando, Conway, Edgewood, and nearby neighborhoods.
           </p>
-          <div className="mt-7 md:inline-flex md:flex-col md:items-end">
+          <div className="mt-7 flex flex-wrap items-center gap-3 md:justify-end">
             <JobberLink className="inline-flex items-center gap-3 rounded-full bg-periwinkle/90 px-6 py-4 text-sm font-bold uppercase tracking-[0.16em] text-cream shadow-soft transition hover:-translate-y-1 hover:bg-coral hover:text-midnight">
               Free Quote
               <ArrowRight size={18} />
             </JobberLink>
+            <a
+              href={phoneHref}
+              className="dark-glass-pill inline-flex items-center gap-2 rounded-full px-5 py-4 text-sm font-bold text-cream transition hover:-translate-y-1 hover:text-cream"
+            >
+              <Phone size={16} aria-hidden="true" />
+              {phoneDisplay}
+            </a>
           </div>
         </motion.div>
       </div>
@@ -616,7 +650,7 @@ function About() {
               We are a father-and-son team with a simple mission: help keep our community clean, one neighbor at a time. As a veteran-owned junk removal service, we bring discipline, respect, and pride into every job.
             </p>
             <p>
-              Whether it is a driveway, siding, patio, garage, or full property cleanup, Fetty's Junk Removal is built on honest work, dependable service, and care for the people and neighborhoods we serve.
+              Whether it is furniture, appliances, garage clutter, or a full property cleanout, Fetty's Junk Removal is built on honest work, dependable service, and care for the people and neighborhoods we serve.
             </p>
             <p>
               Every job is handled with clear communication, respect for your space, and pride in the final sweep because trust is earned one neighbor at a time.
@@ -1012,14 +1046,13 @@ function BookingCTA() {
           <p className="mt-6 max-w-xl text-lg leading-8 text-mist/66">
             Send a few details for junk removal, furniture removal, debris hauling, or property cleanup in Belle Isle or nearby Orlando and the team will get back shortly.
           </p>
-          <div className="mt-8 flex flex-col items-start gap-3">
+          <div className="mt-8">
             <JobberLink
               className="inline-flex items-center justify-center gap-3 rounded-full bg-coral/90 px-6 py-4 text-sm font-bold uppercase tracking-[0.16em] text-midnight shadow-soft transition hover:-translate-y-1 hover:bg-cream"
             >
               Free Quote
               <ArrowRight size={18} />
             </JobberLink>
-            <p className="text-sm font-medium text-mist/54">Booking portal being updated.</p>
           </div>
         </div>
         <div className="relative grid min-h-[24rem] place-items-center overflow-hidden bg-[radial-gradient(circle_at_50%_44%,rgba(157,188,244,0.18),transparent_20rem),linear-gradient(135deg,rgba(7,17,31,0.96),rgba(16,26,51,0.86))] p-10 text-center">
@@ -1099,7 +1132,7 @@ function Testimonials() {
 
 function Footer() {
   return (
-    <footer className="border-t border-line/70 bg-midnight px-5 py-12 text-cream sm:px-8">
+    <footer className="border-t border-line/70 bg-midnight px-5 pb-28 pt-12 text-cream sm:px-8 lg:pb-12">
       <div className="mx-auto max-w-7xl">
         <div className="flex flex-col gap-10 md:flex-row md:items-end md:justify-between">
           <div>
@@ -1122,12 +1155,18 @@ function Footer() {
             </p>
           </div>
           <div className="grid gap-3 text-sm text-mist/70 sm:grid-cols-3">
-            {["Belle Isle", "info@fettysrentals.com", "425-359-7073"].map((item) => (
-              <p key={item} className="inline-flex items-center gap-2">
-                <Check size={15} className="text-coral" />
-                {item}
-              </p>
-            ))}
+            <p className="inline-flex items-center gap-2">
+              <Check size={15} className="text-coral" />
+              Belle Isle
+            </p>
+            <a href={emailHref} className="inline-flex items-center gap-2 transition hover:text-cream">
+              <Mail size={15} className="text-coral" />
+              {emailDisplay}
+            </a>
+            <a href={phoneHref} className="inline-flex items-center gap-2 transition hover:text-cream">
+              <Phone size={15} className="text-coral" />
+              {phoneDisplay}
+            </a>
           </div>
         </div>
 
